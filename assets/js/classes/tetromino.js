@@ -46,8 +46,9 @@ class Tetromino {
     }
     static shapeNames() { return ['i', 'j', 'l', 'o', 's', 't', 'z']; }
 
-    constructor (x=5, y=0, shape=false) {
-        this.type = Tetromino.shapeNames()[Math.floor(Math.random() * 7)];
+    constructor (x=5, y=0, shapeIndex=false) {
+        this.shapeIndex = shapeIndex || Math.floor(Math.random() * 7);
+        this.type = Tetromino.shapeNames()[this.shapeIndex];
         this.gridPosition = new Vector(x, y);
         const shapeScheme = Tetromino.shapes(this.type);
         const letters = letterPatterns[this.type].slice();
@@ -56,7 +57,7 @@ class Tetromino {
             this.shape.push([]);
             for (let x = 0; x < shapeScheme[y].length; x++) {
                 if (shapeScheme[y][x]) {
-                    const block = new Tile(letters.pop());
+                    const block = new Tile(letters.pop(), this.shapeIndex);
                     this.shape[y].push(block);
                 } else {
                     this.shape[y].push(false);
@@ -65,17 +66,21 @@ class Tetromino {
         }
     }
 
-    draw() {
-        const position = new Vector(this.gridPosition.x * tileSize, this.gridPosition.y * tileSize);
+    draw(absX=false, absY=false, size=1.0) {
+        const position = new Vector(
+            absX !== false ? absX : (this.gridPosition.x * tileSize * size),
+            absY !== false ? absY : (this.gridPosition.y * tileSize * size)
+        );
+        // Draws each tiles composing the tetromino.
         for (let y = 0; y < this.shape.length; y++) {
             for (let x = 0; x < this.shape[0].length; x++) {
                 if (!this.shape[y][x]) { continue; }
                 const pos = new Vector(
-                    position.x + (x * tileSize),
-                    position.y + (y * tileSize)
+                    position.x + (x * tileSize * size),
+                    position.y + (y * tileSize * size)
                 );
                 const tile = this.shape[y][x];
-                tile.draw(pos.x, pos.y);
+                tile.draw(pos.x, pos.y, size);
             }
         }
     }

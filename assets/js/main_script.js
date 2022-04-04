@@ -6,6 +6,7 @@ const gridHeight = tileSize * gridSize.y;
 let canvas;
 let context;
 let gameContainer;
+let spriteTile;
 
 const wordsLists = {
     3: _3_letters,
@@ -37,4 +38,5 @@ window.onload = function () {
     context.font = `${fontSize}px monospace`;
     context.textAlign = "center";
     gameContainer = new GameContainer();
+    spriteTile = new SpriteSheet('assets/img/tile.png', 2, 4);
 };

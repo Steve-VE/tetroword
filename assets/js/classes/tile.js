@@ -1,8 +1,9 @@
 class Tile {
-    constructor(letter) {
+    constructor(letter, frameIndex=0) {
         this.letter = letter;
         this.state = 'active';
         this.selected = false;
+        this.frameIndex = frameIndex;
     }
 
     activeSelectiveMode() {
@@ -13,44 +14,23 @@ class Tile {
         this.state = 'locked';
     }
 
-    draw(x, y) {
-        const colorSchemes = [
-            {
-                dark: "#0d2f33",
-                middle: "#1e5c63",
-                light: "#2b99a6",
-            },
-            {
-                dark: 64,
-                middle: 86,
-                light: 100,
-            },
-        ];
+    draw(x, y, size=1, forcedFrame) {
         let colorSchemeIndex = 1;
         if (this.state === 'active' || this.canBeSelected) {
             colorSchemeIndex = 0;
         }
-        const colorScheme = colorSchemes[colorSchemeIndex];
-        noStroke();
-        fill(colorScheme.dark);
-        rect(x, y, tileSize);
-        fill(colorScheme.light);
-        let offset = 2;
-        rect(x + offset, y + offset, tileSize - (offset * 2));
-        fill(colorScheme.middle);
-        offset += 1;
-        rect(x + offset, y + offset, tileSize - (offset * 2));
-        fill(colorScheme.dark);
-        offset += 2;
-        rect(x + offset, y + offset, tileSize - (offset * 2));
-        this.drawLetter(x, y, colorSchemeIndex);
+        const frameIndex = forcedFrame != undefined && !this.canBeSelected ? forcedFrame : this.frameIndex;
+        spriteTile.draw(frameIndex, x, y, tileSize * size, tileSize * size);
+        if (size === 1) {
+            this.drawLetter(x, y, colorSchemeIndex);
+        }
     }
 
     drawLetter(x, y, colorIndex) {
         if (!this.letter) {
             return;
         }
-        const colors = ['#2b99a6', '#cccccc'];
+        const colors = ['rgba(255, 255, 255, 0.6)', 'rgba(255, 255, 255, 0.2)'];
         if (this.canBeSelected) {
             fill('white');
         } else {

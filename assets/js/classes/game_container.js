@@ -105,10 +105,21 @@ class GameContainer {
     }
 
     draw () {
+        // Background.
         fill(10, 20, 30);
         rect(0, 0, canvas.width, canvas.height);
         translate(this.margin.x, this.margin.y);
         this.drawGrid();
+        // Tetrominos.
+        for (const index in this.nextPieces) {
+            const tetromino = this.nextPieces[index];
+            const first = index == 0;
+            tetromino.draw(
+                gridWidth + (first ? 40 : 60),
+                (index * 60) + (first ? 60 : 100),
+                first ? 0.8 : 0.5
+            );
+        }
         if (this.tetromino) {
             this.tetromino.draw();
         }
@@ -138,7 +149,11 @@ class GameContainer {
                 const tile = row[x];
                 const position = new Vector((x * tileSize), (y * tileSize));
                 if (tile) {
-                    tile.draw(position.x, position.y);
+                    if (this.state === WORD) {
+                        tile.draw(position.x, position.y, 1, 7);
+                    } else {
+                        tile.draw(position.x, position.y);
+                    }
                 } else {
                     if (this.state === TETRIS) {
                         fill(colors[(x + y) % 2]);
@@ -153,11 +168,8 @@ class GameContainer {
 
     dropNextTetromino() {
         const nextTetromino = this.nextPieces.shift();
-        if (nextTetromino) {
-            this.tetromino = nextTetromino;
-        } else {
-            this.tetromino = new Tetromino(Math.floor(gridSize.x / 2) - 1, 0);
-        }
+        this.tetromino = nextTetromino;
+        this.nextPieces.push(new Tetromino());
     }
 
     eraseLines() {
@@ -293,6 +305,9 @@ class GameContainer {
                 this.wordProposal = [];
             } else { // Returns to the Tetris mode.
                 this.eraseLines();
+                if (!this.tetromino) {
+                    this.dropNextTetromino();
+                }
                 this.state = TETRIS;
             }
         }

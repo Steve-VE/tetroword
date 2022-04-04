@@ -5,6 +5,14 @@ let _translateX =0;
 let _translateY =0;
 
 
+function drawImage(imageSrc, sx, sy, sw, sh, x, y, w, h) {
+    if (!context) { return; }
+    x += _translateX;
+    y += _translateY;
+    context.drawImage(imageSrc, sx, sy, sw, sh, x, y, w, h);
+}
+
+
 function fill(r, g=undefined, b=undefined, a=1) {
     if (!context) { return; }
     _drawFill = true;
