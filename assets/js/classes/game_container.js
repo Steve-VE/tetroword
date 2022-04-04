@@ -143,23 +143,29 @@ class GameContainer {
         const colors = ['#768494', '#68798c'];
         const colors2 = ['#8d9476', '#8c8868'];
         noStroke();
+        // Draws background's lines.
+        for (let x = 0; x < this.grid[0].length; x++) {
+            if (x % 2) {
+                continue;
+            }
+            fill('rgba(64, 64, 150, 0.2');
+            rect(x * tileSize, 0, tileSize, tileSize * this.grid.length);
+        }
+        // Draws blocks (or shadow gradient for empty space).
         for (let y = 0; y < this.grid.length; y++) {
             const row = this.grid[y];
             for (let x = 0; x < row.length; x++) {
                 const tile = row[x];
                 const position = new Vector((x * tileSize), (y * tileSize));
-                if (tile) {
+                if (tile) { // Draws a block.
                     if (this.state === WORD) {
                         tile.draw(position.x, position.y, 1, 7);
                     } else {
                         tile.draw(position.x, position.y);
                     }
-                } else {
-                    if (this.state === TETRIS) {
-                        fill(colors[(x + y) % 2]);
-                    } else if (this.state === WORD) {
-                        fill(colors2[(x + y) % 2]);
-                    }
+                } else { // Draws a shadow gradient.
+                    const alpha = (1.0 / this.grid.length) * y;
+                    fill(`rgba(0, 0, 0, ${alpha})`);
                     rect(position.x, position.y, tileSize);
                 }
             }
