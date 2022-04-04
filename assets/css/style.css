@@ -15,5 +15,11 @@ canvas {
   width: 800px;
   height: 800px;
   border: 1px solid black;
+  transition: 0.5s;
+}
+
+canvas.paused {
+  transition: 1s;
+  filter: sepia(80%) brightness(0.5) blur(4px);
 }
 /*# sourceMappingURL=style.css.map */

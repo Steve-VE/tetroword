@@ -30,13 +30,14 @@ const wordsLists = {
     21: _21_letters,
 };
 
-window.onload = function () {
+window.onload = async function () {
     const fontSize = 24;
     canvas = document.querySelector('canvas');
     context = canvas.getContext('2d');
     // context.font = `${fontSize}px Titillium Web`;
     context.font = `${fontSize}px monospace`;
     context.textAlign = "center";
-    gameContainer = new GameContainer();
     spriteTile = new SpriteSheet('assets/img/tile.png', 2, 4);
+    await spriteTile.loaded;
+    gameContainer = new GameContainer();
 };

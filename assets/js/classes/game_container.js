@@ -1,7 +1,7 @@
 const [TETRIS, WORD] = [0, 1];
 
 function _initiateInputs() {
-    const inputNames = ['left', 'right', 'down', 'rotateLeft', 'rotateRight'];
+    const inputNames = ['left', 'right', 'down', 'rotateLeft', 'rotateRight', 'pause'];
     const inputs = {};
     for (let inputName of inputNames) {
         inputs[inputName] = {
@@ -20,6 +20,7 @@ const inputMapping = {
     ArrowDown: 'down',
     s: 'down',
     ' ': 'rotateLeft',
+    Tab: 'pause',
 };
 const inputStates = _initiateInputs();
 
@@ -105,6 +106,9 @@ class GameContainer {
     }
 
     draw () {
+        if (this.paused) {
+            return;
+        }
         // Background.
         fill(10, 20, 30);
         rect(0, 0, canvas.width, canvas.height);
@@ -206,6 +210,7 @@ class GameContainer {
         const input = inputMapping[key];
         const inputState = inputStates[input];
         if (inputState) {
+            ev.preventDefault();
             if (!inputState.pressed) {
                 this.inputDelay = 0;
                 this.resetInputDelay();
@@ -235,17 +240,23 @@ class GameContainer {
     }
 
     manageTetrisInput() {
+        if (inputStates.pause.pressed) {
+            inputStates.pause.pressed = false;
+            this.paused = !this.paused;
+            if (this.paused) {
+                // Adds CSS paused class;
+                canvas.classList.add('paused');
+            } else {
+                // Removes CSS paused class;
+                canvas.classList.remove('paused');
+            }
+        }
+        if (this.paused) {
+            return;
+        }
         if (inputStates.left.pressed) {
             if (this.inputDelay === 0) {
                 this.tetromino.goLeft();
-                this.lowerInputDelay();
-                this.inputDelay = Math.max(1, this.currentInputDelay);
-            } else {
-                this.inputDelay--;
-            }
-        } else if (inputStates.right.pressed) {
-            if (this.inputDelay === 0) {
-                this.tetromino.goRight();
                 this.lowerInputDelay();
                 this.inputDelay = Math.max(1, this.currentInputDelay);
             } else {
@@ -264,7 +275,16 @@ class GameContainer {
             } else {
                 this.inputDelay--;
             }
-        } else if (inputStates.rotateLeft.pressed) {
+        } else if (inputStates.right.pressed) {
+            if (this.inputDelay === 0) {
+                this.tetromino.goRight();
+                this.lowerInputDelay();
+                this.inputDelay = Math.max(1, this.currentInputDelay);
+            } else {
+                this.inputDelay--;
+            }
+        }
+        if (inputStates.rotateLeft.pressed) {
             if (this.inputDelay === 0) {
                 this.tetromino.rotateLeft();
                 this.inputDelay = this.currentInputDelay;
@@ -345,11 +365,14 @@ class GameContainer {
     }
 
     processTetrisGame() {
+        this.manageTetrisInput();
+        if (this.paused) {
+            return;
+        }
         if (this.moveDelay === 0) {
             this.tetromino.goDown();
             this.moveDelay = this.moveDelayLimit;
         }
-        this.manageTetrisInput();
         this.moveDelay --;
     }
 

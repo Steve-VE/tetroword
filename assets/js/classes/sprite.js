@@ -1,7 +1,7 @@
 
 class SpriteSheet {
     constructor(source, rowNumber, columnNumber) {
-        this.loaded = false;
+        debugMessage(`-- Loading spritesheet (${source})`);
         this.source = source;
         this.image = new Image();
         this.image.src = this.source;
@@ -10,11 +10,15 @@ class SpriteSheet {
         this.column = columnNumber;
         this.numberOfSprites = this.row * this.column;
 
-        this.image.onload = () => {
-            this.width = this.image.width;
-            this.height = this.image.height;
-            this.spriteSize = new Vector(this.width / this.column, this.height / this.row);
-        };
+        this.loaded = new Promise((resolve, reject) => {
+            this.image.onload = () => {
+                this.width = this.image.width;
+                this.height = this.image.height;
+                this.spriteSize = new Vector(this.width / this.column, this.height / this.row);
+                debugMessage('---- Spritesheet loaded !');
+                resolve();
+            };
+        });
     }
 
     draw(spriteIndex, x, y, width, height) {
