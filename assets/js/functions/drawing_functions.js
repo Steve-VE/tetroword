@@ -53,6 +53,10 @@ function stroke(r, g=undefined, b=undefined, a=1) {
     }
 }
 
+function textAlign(align) {
+    context.textAlign = align;
+}
+
 function translate(x, y) {
     _translateX = x;
     _translateY = y;

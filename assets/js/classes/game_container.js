@@ -42,6 +42,7 @@ class GameContainer {
         );
 
         this.htmlUI = new HtmlUI();
+        this.scoreManager = new ScoreManager();
 
         // Delays used by the Tetris game part.
         this.moveDelay = new Timer(this.fps * 0.75);
@@ -124,7 +125,7 @@ class GameContainer {
             return false;
         }
         word = word.toUpperCase();
-        if (this.foundWords[word]) { // Valid word, since this word was already found by the player.
+        if (this.scoreManager.wordAlreadyFound(word)) { // Valid word, since this word was already found by the player.
             return word;
         }
         const relevantWordList = wordsLists[word.length];
@@ -156,6 +157,15 @@ class GameContainer {
         if (this.tetromino) {
             this.tetromino.draw();
         }
+        // Display the score.
+        let score = this.scoreManager.score ? String(this.scoreManager.score) : '';
+        textAlign('right');
+        fill('gray');
+        write(-20 - (13 * score.length), 20, ''.padStart(12 - score.length, 0));
+        if (score) {
+            fill('white');
+            write(-20, 20, score);
+        }
         translate(0, 0);
     }
 
@@ -168,7 +178,7 @@ class GameContainer {
             if (x % 2) {
                 continue;
             }
-            fill('rgba(64, 64, 150, 0.2');
+            fill('rgba(128, 200, 255, 0.2');
             rect(x * tileSize, 0, tileSize, tileSize * this.grid.length);
         }
         // Draws blocks (or shadow gradient for empty space).
@@ -199,10 +209,12 @@ class GameContainer {
     }
 
     eraseLines() {
+        let nbreOfErasedLines = 0;
         for (let y = 0; y < this.grid.length; y++) {
             const line = this.grid[y];
             const lineIsComplete = line.every(tile => tile);
             if (lineIsComplete) {
+                nbreOfErasedLines++;
                 this.grid.splice(y, 1);
                 const newLine = [];
                 for (let i = 0; i < gridSize.x; i++) {
@@ -210,6 +222,9 @@ class GameContainer {
                 }
                 this.grid.unshift(newLine);
             }
+        }
+        if (nbreOfErasedLines) {
+            this.scoreManager.addScoreForErasedLine(nbreOfErasedLines);
         }
         this.lettersPool = [];
         this._completeLinesIndex = [];
@@ -359,11 +374,7 @@ class GameContainer {
             const foundWord = this.checkWord(this.proposedWord);
             if (foundWord) {
                 // Adds the found word into the score table.
-                if (!this.foundWords[foundWord]) {
-                    this.foundWords[foundWord] = 1;
-                } else {
-                    this.foundWords[foundWord]++;
-                }
+                this.scoreManager.addWord(foundWord);
                 // Erases all letters who was used to write this word.
                 for (const line of this.activeLines) {
                     for (let i = 0; i < line.length; i++) {

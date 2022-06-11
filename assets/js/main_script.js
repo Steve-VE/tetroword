@@ -36,7 +36,6 @@ window.onload = function mainScript() {
     context = canvas.getContext('2d');
     // context.font = `${fontSize}px Titillium Web`;
     context.font = `${fontSize}px monospace`;
-    context.textAlign = "center";
     spriteTile = new SpriteSheet('assets/img/tile.png', 2, 4);
     spriteTile.loaded.then(() => {
         gameContainer = new GameContainer();

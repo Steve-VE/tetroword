@@ -146,6 +146,7 @@ class Tetromino {
                 grid[this.gridPosition.y + y][this.gridPosition.x + x] = tile;
             }
         }
+        gameContainer.scoreManager.addScoreForDroppedPiece();
         gameContainer.resetTetromino();
     }
 

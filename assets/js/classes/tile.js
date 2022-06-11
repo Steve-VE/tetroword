@@ -36,6 +36,7 @@ class Tile {
         } else {
             fill('rgba(255, 255, 255, 0.6)');
         }
+        textAlign('center');
         write(x + (tileSize / 2), y + (tileSize / 2) + 8, this.letter);
     }
 
