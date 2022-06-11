@@ -11,15 +11,97 @@ body {
   justify-content: center;
 }
 
+body #game_container {
+  position: relative;
+  width: 800px;
+  height: 800px;
+}
+
 canvas {
   width: 800px;
   height: 800px;
-  border: 1px solid black;
   transition: 0.5s;
 }
 
 canvas.paused {
   transition: 1s;
   filter: sepia(80%) brightness(0.5) blur(4px);
+}
+
+#ui_container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#ui_container button {
+  padding: 16px;
+  margin-bottom: 32px;
+  border: 1px solid;
+  border-radius: 8px;
+  color: white;
+  font-size: 3em;
+  background-color: transparent;
+}
+
+#ui_container button:not(:disabled) {
+  cursor: pointer;
+}
+
+#ui_container button:not(:disabled):active {
+  color: red;
+}
+
+#ui_container button:not(:disabled):hover {
+  font-size: 3.2em;
+}
+
+#ui_container button:disabled {
+  opacity: 0.5;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.container .text-box {
+  padding: 16px;
+  padding-top: 8px;
+  border-radius: 16px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  font-family: 'Titillium Web';
+  font-size: 3em;
+  white-space: pre;
+}
+
+.container .text-box .text-input {
+  border-right: 4px solid white;
+  animation: blinky-right-border 1s ease 0s infinite normal none;
+}
+
+@keyframes blinky-right-border {
+  0% {
+    border-right: 4px solid white;
+  }
+  55% {
+    border-right: 4px solid white;
+  }
+  56% {
+    border-right: 4px solid transparent;
+  }
+  100% {
+    border-right: 4px solid transparent;
+  }
 }
 /*# sourceMappingURL=style.css.map */

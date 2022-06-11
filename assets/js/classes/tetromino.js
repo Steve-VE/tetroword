@@ -46,9 +46,13 @@ class Tetromino {
     }
     static shapeNames() { return ['i', 'j', 'l', 'o', 's', 't', 'z']; }
 
-    constructor (x=5, y=0, shapeIndex=false) {
+    constructor (x=4, y=-2, shapeIndex=false) {
         this.shapeIndex = shapeIndex || Math.floor(Math.random() * 7);
         this.type = Tetromino.shapeNames()[this.shapeIndex];
+        if (this.type === 'i') { // Position's adjustment in case the tetromino is a pipe.
+            x--;
+            y++;
+        }
         this.gridPosition = new Vector(x, y);
         const shapeScheme = Tetromino.shapes(this.type);
         const letters = letterPatterns[this.type].slice();
@@ -64,6 +68,24 @@ class Tetromino {
                 }
             }
         }
+    }
+
+    canRotate(shape, rx=0, ry=0) {
+        if (this.type === 'o') {
+            return true; // The square tetromino can rotate in any circumstance/
+        }
+        const grid = gameContainer.grid;
+        for (let y = 0; y < shape.length; y++) {
+            for (let x = 0; x < shape[0].length; x++) {
+                if (!shape[y][x]) { continue; }
+                const pos = new Vector(this.gridPosition.x + x + rx, this.gridPosition.y + y + ry);
+                if (pos.x < 0 || pos.x >= gridSize.x || (
+                    pos.y >= 0 && (pos.y >= gridSize.y || grid[pos.y][pos.x]))) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     draw(absX=false, absY=false, size=1.0) {
@@ -116,6 +138,10 @@ class Tetromino {
                 if (!tile) {
                     continue;
                 }
+                if (this.gridPosition.y < 0) {
+                    gameContainer.gameOver();
+                    return;
+                }
                 tile.state = 'locked';
                 grid[this.gridPosition.y + y][this.gridPosition.x + x] = tile;
             }
@@ -133,7 +159,36 @@ class Tetromino {
                 newShape[y].push(this.shape[x][width - y - 1]);
             }
         }
-        this.shape = newShape;
+        if (this.canRotate(newShape)) {
+            this.shape = newShape;
+        } else if(this.canRotate(newShape, -1)) {
+            this.gridPosition.x -= 1;
+            this.shape = newShape;
+        } else if(this.canRotate(newShape, -2)) {
+            this.gridPosition.x -= 2;
+            this.shape = newShape;
+        } else if(this.canRotate(newShape, 1)) {
+            this.gridPosition.x += 1;
+            this.shape = newShape;
+        } else if(this.canRotate(newShape, 2)) {
+            this.gridPosition.x += 2;
+            this.shape = newShape;
+        }
+    }
+
+    rotateRight() {
+        const newShape = [];
+        const height = this.shape.length;
+        const width = this.shape[0].length;
+        for (let y = 0; y < width; y++) {
+            newShape.push([]);
+            for (let x = height - 1; x >= 0; x--) {
+                newShape[y].push(this.shape[x][y]);
+            }
+        }
+        if (this.canRotate(newShape)) {
+            this.shape = newShape;
+        }
     }
 
     get canGoDown() {
@@ -142,7 +197,7 @@ class Tetromino {
             for (let x = 0; x < this.shape[0].length; x++) {
                 if (!this.shape[y][x]) { continue; }
                 const pos = new Vector(this.gridPosition.x + x, this.gridPosition.y + y + 1);
-                if (pos.y >= gridSize.y || grid[pos.y][pos.x]) {
+                if (pos.y >= 0 && (pos.y >= gridSize.y || grid[pos.y][pos.x])) {
                     return false;
                 }
             }
@@ -156,7 +211,10 @@ class Tetromino {
             for (let x = 0; x < this.shape[0].length; x++) {
                 if (!this.shape[y][x]) { continue; }
                 const pos = new Vector(this.gridPosition.x + x, this.gridPosition.y + y);
-                if (pos.x <= 0 || grid[pos.y][pos.x - 1]) {
+                if (pos.x <= 0 || pos.x >= gridSize.x) {
+                    return false;
+                }
+                if (pos.y >=0 && (pos.x <= 0 || grid[pos.y][pos.x - 1])) {
                     return false;
                 }
             }
@@ -170,19 +228,14 @@ class Tetromino {
             for (let x = 0; x < this.shape[0].length; x++) {
                 if (!this.shape[y][x]) { continue; }
                 const pos = new Vector(this.gridPosition.x + x + 1, this.gridPosition.y + y);
-                if (pos.x >= gridSize.x || grid[pos.y][pos.x]) {
+                if (pos.x <= 0 || pos.x >= gridSize.x) {
+                    return false;
+                }
+                if (pos.y >=0 && (pos.x >= gridSize.x || grid[pos.y][pos.x])) {
                     return false;
                 }
             }
         }
-        return true;
-    }
-
-    get canRotateleftt() {
-        return true;
-    }
-
-    get canRotateRight() {
         return true;
     }
 }

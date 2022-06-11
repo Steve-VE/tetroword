@@ -1,7 +1,7 @@
-const [TETRIS, WORD] = [0, 1];
+const [INTRO, TETRIS, WORD] = [0, 1, 2];
 
 function _initiateInputs() {
-    const inputNames = ['left', 'right', 'down', 'rotateLeft', 'rotateRight', 'pause'];
+    const inputNames = ['left', 'right', 'up', 'down', 'rotateLeft', 'rotateRight', 'pause'];
     const inputs = {};
     for (let inputName of inputNames) {
         inputs[inputName] = {
@@ -17,9 +17,13 @@ const inputMapping = {
     q: 'left',
     ArrowRight: 'right',
     d: 'right',
+    ArrowUp: 'up',
+    z: 'up',
     ArrowDown: 'down',
     s: 'down',
     ' ': 'rotateLeft',
+    a: 'rotateLeft',
+    e: 'rotateRight',
     Tab: 'pause',
 };
 const inputStates = _initiateInputs();
@@ -30,19 +34,21 @@ class GameContainer {
         this.fps = 60;
         this.framerate = 1000 / this.fps;
         this.framecount = 0;
-        this.state = TETRIS;
+        this.started = false;
+        this.state = INTRO;
         this.margin = new Vector(
             (canvas.width - gridWidth) / 2,
             (canvas.height - gridHeight) / 2
         );
 
-        // Used by the Tetris game part.
-        this.moveDelayLimit = 45;
-        this.moveDelay = this.moveDelayLimit;
-        this.inputDelay = 0;
-        this.initialInputDelay = 16;
-        this.currentInputDelay = 0;
-        this.tetromino = new Tetromino(Math.floor(gridSize.x / 2) - 1, 0);
+        this.htmlUI = new HtmlUI();
+
+        // Delays used by the Tetris game part.
+        this.moveDelay = new Timer(this.fps * 0.75);
+        this.inputDelay = new Timer({
+            count: this.fps * 0.25,
+            minimumCount: this.fps * 0.1,
+        });
 
         // Used by the Word game part.
         this.lettersPool = [];
@@ -62,10 +68,33 @@ class GameContainer {
         setInterval(this.process.bind(this), this.framerate);
         document.addEventListener('keydown', this.keyPressed.bind(this));
         document.addEventListener('keyup', this.keyRelased.bind(this));
-        this.nextPieces = [];
-        for (let i = 0; i < 4; i++) {
-            this.nextPieces.push(new Tetromino());
+    }
+
+    activeWordMode() {
+        this.state = WORD;
+        this.addTextBox();
+    }
+
+    addTextBox() {
+        // const htmlTextBox = new HtmlTextBox();
+        // canvas.parentElement.append(htmlTextBox.element);
+        this.textBox = document.createElement('span');
+        this.textBox.classList.add('text-input');
+        const htmlTextContainer = document.createElement('div');
+        htmlTextContainer.classList.add('text-box');
+        const htmlTextBoxContainer = document.createElement('div');
+        htmlTextBoxContainer.classList.add('container');
+        htmlTextContainer.append(this.textBox);
+        htmlTextBoxContainer.append(htmlTextContainer);
+        const bottomLineIndex = this._completeLinesIndex[this._completeLinesIndex.length -1];
+        // The text box will be displayed on the top of the completed lines.
+        let posY = (this._completeLinesIndex[0] - 3) * tileSize;
+        // If the completed lines are too high, we display the text box under them.
+        if (bottomLineIndex <= 6) {
+            posY = (bottomLineIndex + 2) * tileSize;
         }
+        htmlTextBoxContainer.style.top = `${posY}px`;
+        canvas.parentElement.append(htmlTextBoxContainer);
     }
 
     checkLines() {
@@ -76,14 +105,14 @@ class GameContainer {
                 this._completeLinesIndex.push(y);
             }
         }
-        if (this._completeLinesIndex.length) {
+        if (this.activeLines.length) {
             for (const line of this.activeLines) {
                 for (const tile of line) {
                     tile.activeSelectiveMode();
                     this.lettersPool.push(tile);
                 }
             }
-            this.state = WORD;
+            this.activeWordMode();
         }
     }
 
@@ -126,19 +155,6 @@ class GameContainer {
         }
         if (this.tetromino) {
             this.tetromino.draw();
-        }
-        if (this.state === WORD) {
-            const textPosition = new Vector(gridWidth / 2, gridHeight * 0.6);
-            noStroke();
-            fill(0, 0, 0, 0.2);
-            rect(
-                textPosition.x - (this.proposedWord.length * 8),
-                textPosition.y - 24,
-                this.proposedWord.length * 16,
-                32
-            );
-            fill('white');
-            write(textPosition.x, textPosition.y, this.proposedWord);
         }
         translate(0, 0);
     }
@@ -185,14 +201,8 @@ class GameContainer {
     eraseLines() {
         for (let y = 0; y < this.grid.length; y++) {
             const line = this.grid[y];
-            let eraseLine = true;
-            for (const tile of line) {
-                if (!tile) {
-                    eraseLine = false;
-                    break;
-                }
-            }
-            if (eraseLine) {
+            const lineIsComplete = line.every(tile => tile);
+            if (lineIsComplete) {
                 this.grid.splice(y, 1);
                 const newLine = [];
                 for (let i = 0; i < gridSize.x; i++) {
@@ -205,6 +215,48 @@ class GameContainer {
         this._completeLinesIndex = [];
     }
 
+    gameOver() {
+        const delay = 5;
+        const fillGrid = (x, y) => {
+            if (x >= gridSize.x) {
+                x = 0;
+                y--;
+            }
+            if (y < 0) {
+                return;
+            }
+            const frameIndex = 7; // Frame index for the gray tile.
+            const tile = this.grid[y][x];
+            if (tile) {
+                tile.frameIndex = frameIndex;
+            } else {
+                this.grid[y][x] = new Tile('', frameIndex);
+            }
+            setTimeout(fillGrid.bind(this, ++x, y), delay);
+        };
+        this.state = INTRO;
+        setTimeout(fillGrid.bind(this, 0, gridSize.y - 1), delay);
+    }
+
+    gameStart() {
+        this.nextPieces = [];
+        for (let i = 0; i < 4; i++) {
+            this.nextPieces.push(new Tetromino());
+        }
+        this.tetromino = new Tetromino();
+        this.state = TETRIS;
+    }
+
+    hardDropTetromino() {
+        if (this.tetromino) {
+            while (this.tetromino.canGoDown) {
+                this.tetromino.goDown();
+            }
+            this.tetromino.lock();
+            this.moveDelay.reset();
+        }
+    }
+
     keyPressed(ev) {
         const key = ev.key.length === 1 ? ev.key.toLowerCase() : ev.key;
         const input = inputMapping[key];
@@ -212,8 +264,8 @@ class GameContainer {
         if (inputState) {
             ev.preventDefault();
             if (!inputState.pressed) {
-                this.inputDelay = 0;
-                this.resetInputDelay();
+                this.inputDelay.reset();
+                this.inputDelay.count = 0;
             }
             inputState.pressed = true;
         }
@@ -231,14 +283,6 @@ class GameContainer {
         }
     }
 
-    lowerInputDelay(delta=0.5) {
-        this.currentInputDelay *= delta;
-    }
-
-    resetInputDelay() {
-        this.currentInputDelay = this.initialInputDelay;
-    }
-
     manageTetrisInput() {
         if (inputStates.pause.pressed) {
             inputStates.pause.pressed = false;
@@ -254,51 +298,63 @@ class GameContainer {
         if (this.paused) {
             return;
         }
-        if (inputStates.left.pressed) {
-            if (this.inputDelay === 0) {
-                this.tetromino.goLeft();
-                this.lowerInputDelay();
-                this.inputDelay = Math.max(1, this.currentInputDelay);
+        if (inputStates.up.pressed) {
+            if (this.inputDelay.finished) {
+                this.hardDropTetromino();
+                this.inputDelay.reset();
             } else {
-                this.inputDelay--;
+                this.inputDelay.decrease();
+            }
+        } else if (inputStates.left.pressed) {
+            if (this.inputDelay.finished) {
+                this.tetromino.goLeft();
+                this.inputDelay.lowerDelay();
+            } else {
+                this.inputDelay.decrease();
             }
         } else if (inputStates.down.pressed) {
-            if (this.inputDelay === 0) {
-                this.moveDelay = this.moveDelayLimit;
+            if (this.inputDelay.finished) {
+                this.moveDelay.reset();
                 if (this.tetromino.canGoDown) {
                     this.tetromino.goDown();
                 } else{
                     this.tetromino.lock();
                 }
-                this.lowerInputDelay();
-                this.inputDelay = Math.max(1, this.currentInputDelay);
+                this.inputDelay.lowerDelay();
             } else {
-                this.inputDelay--;
+                this.inputDelay.decrease();
             }
         } else if (inputStates.right.pressed) {
-            if (this.inputDelay === 0) {
+            if (this.inputDelay.finished) {
                 this.tetromino.goRight();
-                this.lowerInputDelay();
-                this.inputDelay = Math.max(1, this.currentInputDelay);
+                this.inputDelay.lowerDelay();
             } else {
-                this.inputDelay--;
+                this.inputDelay.decrease();
             }
-        }
-        if (inputStates.rotateLeft.pressed) {
-            if (this.inputDelay === 0) {
+        } else if (inputStates.rotateLeft.pressed) {
+            if (this.inputDelay.finished) {
                 this.tetromino.rotateLeft();
-                this.inputDelay = this.currentInputDelay;
+                this.inputDelay.reset();
             } else {
-                this.inputDelay--;
+                this.inputDelay.decrease();
+            }
+        } else if (inputStates.rotateRight.pressed) {
+            if (this.inputDelay.finished) {
+                this.tetromino.rotateRight();
+                this.inputDelay.reset();
+            } else {
+                this.inputDelay.decrease();
             }
         }
     }
 
     manageWordInput(ev) {
         const { key } = ev;
+        let refrestWord = false;
         if (key === 'Backspace' && this.wordProposal.length) { // Deletes last character.
             const tile = this.wordProposal.pop();
             tile.selected = false;
+            refrestWord = true;
         } else if (key === 'Enter' && this.wordProposal.length >= 3) { // Submits the current word.
             const foundWord = this.checkWord(this.proposedWord);
             if (foundWord) {
@@ -318,6 +374,7 @@ class GameContainer {
                     }
                 }
                 this.wordProposal = [];
+                refrestWord = true;
             }
         } else if (key === 'Escape') { // Removes current word or returns to Tetris mode.
             if (this.wordProposal.length) { // Removes current word.
@@ -329,7 +386,9 @@ class GameContainer {
                     }
                 }
                 this.wordProposal = [];
+                refrestWord = true;
             } else { // Returns to the Tetris mode.
+                this.removeTextBox();
                 this.eraseLines();
                 if (!this.tetromino) {
                     this.dropNextTetromino();
@@ -345,10 +404,14 @@ class GameContainer {
                 const tile = this.lettersPool[i];
                 if (letter === tile.letter && tile.canBeSelected) {
                     this.wordProposal.push(this.lettersPool[i]);
+                    refrestWord = true;
                     tile.selected = true;
                     break;
                 }
             }
+        }
+        if (refrestWord) {
+            this.textBox.innerText = ` ${this.proposedWord} `;
         }
     }
 
@@ -369,20 +432,27 @@ class GameContainer {
         if (this.paused) {
             return;
         }
-        if (this.moveDelay === 0) {
-            this.tetromino.goDown();
-            this.moveDelay = this.moveDelayLimit;
+        if (this.tetromino) {
+            if (this.moveDelay.finished) {
+                this.tetromino.goDown();
+                this.moveDelay.reset();
+            }
+            this.moveDelay.decrease();
         }
-        this.moveDelay --;
     }
 
     processWordGame() {
         return;
     }
 
+    removeTextBox() {
+        this.textBox.parentElement.remove();
+        this.textBox = undefined;
+    }
+
     resetTetromino() {
         delete this.tetromino;
-        this.resetInputDelay();
+        this.inputDelay.reset();
         this.checkLines();
         if (this.state === TETRIS) {
             this.dropNextTetromino();

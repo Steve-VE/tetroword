@@ -30,7 +30,7 @@ const wordsLists = {
     21: _21_letters,
 };
 
-window.onload = async function () {
+window.onload = function mainScript() {
     const fontSize = 24;
     canvas = document.querySelector('canvas');
     context = canvas.getContext('2d');
@@ -38,6 +38,7 @@ window.onload = async function () {
     context.font = `${fontSize}px monospace`;
     context.textAlign = "center";
     spriteTile = new SpriteSheet('assets/img/tile.png', 2, 4);
-    await spriteTile.loaded;
-    gameContainer = new GameContainer();
+    spriteTile.loaded.then(() => {
+        gameContainer = new GameContainer();
+    });
 };
