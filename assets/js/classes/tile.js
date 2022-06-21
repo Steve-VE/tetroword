@@ -54,7 +54,7 @@ class Tile {
      */
     pickLetter() {
         if (!letterPools.length) {
-            letterPools = [...data.letterPools[lang]];
+            letterPools = [...data.letterPools[config.lang]];
         }
         const letterIndex = Math.floor(Math.random() * letterPools.length);
         return letterPools.splice(letterIndex, 1)[0];

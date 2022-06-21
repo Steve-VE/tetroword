@@ -1,9 +1,5 @@
-const env = {
-    debugMode: true,
-};
-
 function debugMessage(message) {
-    if (env.debugMode) {
+    if (config.debug) {
         console.log(message);
     }
 }

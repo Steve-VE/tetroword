@@ -4,11 +4,11 @@ class HtmlUI {
         this.element.id = 'ui_container';
         this.buttons = [
             new HtmlButton(this, translation("Start Game"), 'start'),
-            new HtmlButton(this, translation("Records"), 'records'),
-            new HtmlButton(this, translation("Settings"), 'options'),
+            // new HtmlButton(this, translation("Records"), 'records'),
+            // new HtmlButton(this, translation("Settings"), 'options'),
         ];
-        this.buttons[1].element.disabled = true;
-        this.buttons[2].element.disabled = true;
+        // this.buttons[1].element.disabled = true;
+        // this.buttons[2].element.disabled = true;
         canvas.parentElement.append(this.element);
     }
 
@@ -19,6 +19,10 @@ class HtmlUI {
 
     close() {
         this.element.style.display = 'none';
+    }
+
+    display() {
+        this.element.style.display = '';
     }
 }
 

@@ -56,9 +56,9 @@ class ScoreManager {
         }
     }
 
-    incrementAllLettersUsed() {
-        this.usedAllLetters++;
-        this._addScore('word', __POINTS_ALL_LETTERS_USED);
+    incrementAllLettersUsed(nbr=1) {
+        this.usedAllLetters += nbr;
+        this._addScore('word', __POINTS_ALL_LETTERS_USED * nbr);
     }
 
     wordAlreadyFound(word) {

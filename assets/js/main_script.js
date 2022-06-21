@@ -1,13 +1,4 @@
-function getUserLang() {
-    const supportedLangs = ['en', 'fr'];
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-    const userLang = urlParams.get('lang');
-    return supportedLangs.includes(userLang) ? userLang : 'en';
-}
-
-const lang = getUserLang();
-
+const config = new Config();
 const tileSize = 38;
 const gridSize = new Vector(10, 20);
 const gridWidth = tileSize * gridSize.x;

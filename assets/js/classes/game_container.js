@@ -42,36 +42,18 @@ class GameContainer {
         );
 
         this.htmlUI = new HtmlUI();
-        this.scoreManager = new ScoreManager();
+        this.initializeGrid();
 
         // Variables and delays used by the Tetris game part.
-        this.speed = this.fps * 0.75;
         this._minSpeed = this.fps * 0.03;
-        this.moveDelay = new Timer(this.speed);
-        this.difficulty = 0;
-        this.penaltyPoints = 0; // When get 10 penalty points, increase the difficulty by 1.
-        this.inputDelay = new Timer({
-            count: this.speed * 0.3,
-            minimumCount: this.speed * 0.8,
-        });
 
-        // Variables and delays sed by the Word game part.
+        // Variables and delays used by the Word game part.
         this.lettersPool = [];
         this.wordProposal = [];
-        this.foundWords = {};
         this.writingTimer = new Timer({
             count: this.fps * 10,
             whenIsOver: this.activeTetrisMode.bind(this),
         });
-
-        // Initializes the grid.
-        this._grid = [];
-        for (let y = 0; y < gridSize.y; y++) {
-            this._grid[y] = [];
-            for (let x = 0; x < gridSize.x; x++) {
-                this._grid[y].push(0);
-            }
-        }
         this._completeLinesIndex = [];
 
         setInterval(this.process.bind(this), this.framerate);
@@ -147,7 +129,7 @@ class GameContainer {
         if (this.scoreManager.wordAlreadyFound(word)) { // Valid word, since this word was already found by the player.
             return word;
         }
-        const relevantWordList = data.words[lang][word.length];
+        const relevantWordList = data.words[config.lang][word.length];
         if (relevantWordList.includes(word)) { // Valid word !
             return word;
         }
@@ -155,12 +137,12 @@ class GameContainer {
     }
 
     computeDelay() {
-        console.log(`-- Difficulty: ${this.difficulty}`);
-        console.log(`-- Old Speed: ${this.speed}`);
-        const newSpeed = this.fps * (0.75 - (this.difficulty * 0.5));
-        this.speed = Math.max(this._minSpeed, newSpeed);
+        debugMessage(`-- Difficulty: ${this.difficulty}`);
+        debugMessage(`-- Old Speed: ${this.speed}`);
+        const newSpeed = this.fps * (0.75 - (this.difficulty * 0.25));
+        this.speed = Math.round(Math.max(this._minSpeed, newSpeed));
         this.moveDelay.set(this.speed);
-        console.log(`-- New Speed: ${this.speed}`);
+        debugMessage(`-- New Speed: ${this.speed}`);
     }
 
     draw () {
@@ -199,10 +181,10 @@ class GameContainer {
             }
         }
         if (this.state === WORD) {
-            // Display the timer.
+            // Display the timer as a bar.
             const { completion } = this.writingTimer;
-            const colorGood = [0, 255, 0, completion];
-            const colorHurry = [255, 0, 0];
+            const colorGood = [75, 120, 180, completion];
+            const colorHurry = [80, 25, 100];
             const pos = new Vector(0, (gridSize.y * tileSize) + 2);
             const size = new Vector(tileSize * this.grid[0].length, 16);
             fill('black');
@@ -274,14 +256,16 @@ class GameContainer {
         if (nbrOfErasedLines) {
             completion /= nbrOfErasedLines;
             if (completion === 1) { // All letters was used ! Amazing !
-                this.scoreManager.incrementAllLettersUsed();
-            } else if (completion <= 0.6) { // 60% or less of letters was used: adds penalty points.
-                let penaltyPoints = 7 - (completion * 10);
+                this.scoreManager.incrementAllLettersUsed(nbrOfErasedLines);
+            } else if (completion <= 0.8) { // 80% or less of letters was used: adds penalty points.
+                const penaltyLimit = 40;
+                let penaltyPoints = 9 - (completion * 10);
                 penaltyPoints = Math.round(penaltyPoints * (penaltyPoints * 0.5)) * nbrOfErasedLines;
                 this.penaltyPoints += penaltyPoints;
-                if (this.penaltyPoints <= 100) { // Too much penalty points: increases the difficulty.
-                    this.penaltyPoints -= 100;
-                    this.difficulty += 0.1;
+                if (this.penaltyPoints >= penaltyLimit) { // Too much penalty points: increases the difficulty.
+                    const penaltySubstract = Math.floor(this.penaltyPoints / penaltyLimit);
+                    this.difficulty += penaltySubstract * 0.1;
+                    this.penaltyPoints -= penaltySubstract * penaltyLimit;
                     this.computeDelay();
                 }
             }
@@ -292,29 +276,42 @@ class GameContainer {
     }
 
     gameOver() {
-        const delay = 5;
-        const fillGrid = (x, y) => {
-            if (x >= gridSize.x) {
-                x = 0;
+        const fillingPromise = new Promise(resolve => {
+            const delay = 5;
+            const fillGrid = (x, y) => {
+                if (x >= gridSize.x) {
+                    x = 0;
                 y--;
-            }
-            if (y < 0) {
-                return;
-            }
-            const frameIndex = 7; // Frame index for the gray tile.
-            const tile = this.grid[y][x];
-            if (tile) {
-                tile.frameIndex = frameIndex;
-            } else {
-                this.grid[y][x] = new Tile('', frameIndex);
-            }
-            setTimeout(fillGrid.bind(this, ++x, y), delay);
-        };
-        this.state = INTRO;
-        setTimeout(fillGrid.bind(this, 0, gridSize.y - 1), delay);
+                }
+                if (y < 0) {
+                    return resolve();
+                }
+                const frameIndex = 7; // Frame index for the gray tile.
+                const tile = this.grid[y][x];
+                if (tile) {
+                    tile.frameIndex = frameIndex;
+                } else {
+                    this.grid[y][x] = new Tile('', frameIndex);
+                }
+                setTimeout(fillGrid.bind(this, ++x, y), delay);
+            };
+            this.state = INTRO;
+            setTimeout(fillGrid.bind(this, 0, gridSize.y - 1), delay);
+        });
+        fillingPromise.then(() => {
+            setTimeout(() => {
+                this.htmlUI.display();
+            }, 500);
+        });
     }
 
     gameStart() {
+        this.resetTimer();
+        this.scoreManager = new ScoreManager();
+        this.difficulty = 0;
+        this.penaltyPoints = 0; // When get 10 penalty points, increase the difficulty by 1.
+        this.initializeGrid();
+
         this.nextPieces = [];
         for (let i = 0; i < 4; i++) {
             this.nextPieces.push(new Tetromino());
@@ -331,6 +328,16 @@ class GameContainer {
             }
             this.tetromino.lock();
             this.moveDelay.reset();
+        }
+    }
+
+    initializeGrid() {
+        this.grid = [];
+        for (let y = 0; y < gridSize.y; y++) {
+            this.grid[y] = [];
+            for (let x = 0; x < gridSize.x; x++) {
+                this.grid[y].push(0);
+            }
         }
     }
 
@@ -510,7 +517,7 @@ class GameContainer {
     }
 
     process() {
-        // console.log(`${this.framecount} (${Math.floor(this.framecount / this.fps)})`);
+        // debugMessage(`${this.framecount} (${Math.floor(this.framecount / this.fps)})`);
         switch (this.state) {
             case TETRIS:
                 this.processTetrisGame(); break;
@@ -554,16 +561,24 @@ class GameContainer {
         }
     }
 
+    /**
+     * (Re)set the timers used for gameplay purpose.
+     */
+    resetTimer() {
+        this.speed = this._minSpeed * 25;
+        this.moveDelay = new Timer(this.speed);
+        this.inputDelay = new Timer({
+            count: this.speed * 0.3,
+            minimumCount: this.speed * 0.8,
+        });
+    }
+
     get activeLines() {
         const lines = [];
         for (const lineIndex of this._completeLinesIndex) {
             lines.push(this.grid[lineIndex]);
         }
         return lines;
-    }
-
-    get grid() {
-        return this._grid;
     }
 
     get proposedWord() {
