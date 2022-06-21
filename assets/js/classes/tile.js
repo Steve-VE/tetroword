@@ -1,6 +1,8 @@
+let letterPools = [];
+
 class Tile {
     constructor(letter, frameIndex=0) {
-        this.letter = letter;
+        this.letter = letter || this.pickLetter();
         this.state = 'active';
         this.selected = false;
         this.frameIndex = frameIndex;
@@ -43,6 +45,19 @@ class Tile {
     empty() {
         this.letter = false;
         this.selected = false;
+    }
+
+    /**
+     * Returns a random letter. Each letter has more or less chance to be picked
+     * depending of its use frequence in the current langage.
+     * @return {String}
+     */
+    pickLetter() {
+        if (!letterPools.length) {
+            letterPools = [...data.letterPools[lang]];
+        }
+        const letterIndex = Math.floor(Math.random() * letterPools.length);
+        return letterPools.splice(letterIndex, 1)[0];
     }
 
     get canBeSelected() {

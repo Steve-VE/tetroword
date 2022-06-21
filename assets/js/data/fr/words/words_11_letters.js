@@ -1,4 +1,4 @@
-const _11_letters = [
+data.words.fr['11'] = [
     'AALENIENNES',
     'ABAISSABLES',
     'ABAISSAIENT',

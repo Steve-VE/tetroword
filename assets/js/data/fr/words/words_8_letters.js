@@ -1,4 +1,4 @@
-const _8_letters = [
+data.words.fr['8'] = [
     'AALENIEN',
     'ABACOSTS',
     'ABACULES',

@@ -1,4 +1,4 @@
-const _16_letters = [
+data.words.fr['16'] = [
     'ABASOURDISSAIENT',
     'ABASOURDISSANTES',
     'ABATARDISSEMENTS',

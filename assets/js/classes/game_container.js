@@ -44,17 +44,25 @@ class GameContainer {
         this.htmlUI = new HtmlUI();
         this.scoreManager = new ScoreManager();
 
-        // Delays used by the Tetris game part.
-        this.moveDelay = new Timer(this.fps * 0.75);
+        // Variables and delays used by the Tetris game part.
+        this.speed = this.fps * 0.75;
+        this._minSpeed = this.fps * 0.03;
+        this.moveDelay = new Timer(this.speed);
+        this.difficulty = 0;
+        this.penaltyPoints = 0; // When get 10 penalty points, increase the difficulty by 1.
         this.inputDelay = new Timer({
-            count: this.fps * 0.25,
-            minimumCount: this.fps * 0.1,
+            count: this.speed * 0.3,
+            minimumCount: this.speed * 0.8,
         });
 
-        // Used by the Word game part.
+        // Variables and delays sed by the Word game part.
         this.lettersPool = [];
         this.wordProposal = [];
         this.foundWords = {};
+        this.writingTimer = new Timer({
+            count: this.fps * 10,
+            whenIsOver: this.activeTetrisMode.bind(this),
+        });
 
         // Initializes the grid.
         this._grid = [];
@@ -73,7 +81,17 @@ class GameContainer {
 
     activeWordMode() {
         this.state = WORD;
+        this.writingTimer.reset();
         this.addTextBox();
+    }
+
+    activeTetrisMode() {
+        this.removeTextBox();
+        this.eraseLines();
+        if (!this.tetromino) {
+            this.dropNextTetromino();
+        }
+        this.state = TETRIS;
     }
 
     addTextBox() {
@@ -81,6 +99,7 @@ class GameContainer {
         // canvas.parentElement.append(htmlTextBox.element);
         this.textBox = document.createElement('span');
         this.textBox.classList.add('text-input');
+        this.textBox.textContent = ' ';
         const htmlTextContainer = document.createElement('div');
         htmlTextContainer.classList.add('text-box');
         const htmlTextBoxContainer = document.createElement('div');
@@ -128,11 +147,20 @@ class GameContainer {
         if (this.scoreManager.wordAlreadyFound(word)) { // Valid word, since this word was already found by the player.
             return word;
         }
-        const relevantWordList = wordsLists[word.length];
+        const relevantWordList = data.words[lang][word.length];
         if (relevantWordList.includes(word)) { // Valid word !
             return word;
         }
         return false; // No valid word was found.
+    }
+
+    computeDelay() {
+        console.log(`-- Difficulty: ${this.difficulty}`);
+        console.log(`-- Old Speed: ${this.speed}`);
+        const newSpeed = this.fps * (0.75 - (this.difficulty * 0.5));
+        this.speed = Math.max(this._minSpeed, newSpeed);
+        this.moveDelay.set(this.speed);
+        console.log(`-- New Speed: ${this.speed}`);
     }
 
     draw () {
@@ -158,20 +186,38 @@ class GameContainer {
             this.tetromino.draw();
         }
         // Display the score.
-        let score = this.scoreManager.score ? String(this.scoreManager.score) : '';
-        textAlign('right');
-        fill('gray');
-        write(-20 - (13 * score.length), 20, ''.padStart(12 - score.length, 0));
-        if (score) {
-            fill('white');
-            write(-20, 20, score);
+        if (this.started) {
+            let scorePos = new Vector(-20, 40);
+            let score = this.scoreManager.score ? String(this.scoreManager.score) : '';
+            textAlign('right');
+            fill('gray');
+            write(scorePos.x, scorePos.y - 20, "Score:");
+            write(scorePos.x - (13 * score.length), scorePos.y, ''.padStart(12 - score.length, 0));
+            if (score) {
+                fill('white');
+                write(scorePos.x, scorePos.y, score);
+            }
+        }
+        if (this.state === WORD) {
+            // Display the timer.
+            const { completion } = this.writingTimer;
+            const colorGood = [0, 255, 0, completion];
+            const colorHurry = [255, 0, 0];
+            const pos = new Vector(0, (gridSize.y * tileSize) + 2);
+            const size = new Vector(tileSize * this.grid[0].length, 16);
+            fill('black');
+            stroke('white');
+            rect(pos.x, pos.y, size.x, size.y);
+            noStroke();
+            fill(...colorHurry);
+            rect(pos.x, pos.y, size.x * completion, size.y);
+            fill(...colorGood);
+            rect(pos.x, pos.y, size.x * completion, size.y);
         }
         translate(0, 0);
     }
 
     drawGrid() {
-        const colors = ['#768494', '#68798c'];
-        const colors2 = ['#8d9476', '#8c8868'];
         noStroke();
         // Draws background's lines.
         for (let x = 0; x < this.grid[0].length; x++) {
@@ -209,12 +255,14 @@ class GameContainer {
     }
 
     eraseLines() {
-        let nbreOfErasedLines = 0;
+        let nbrOfErasedLines = 0;
+        let completion = 0;
         for (let y = 0; y < this.grid.length; y++) {
             const line = this.grid[y];
             const lineIsComplete = line.every(tile => tile);
             if (lineIsComplete) {
-                nbreOfErasedLines++;
+                completion += line.filter(tile => tile.letter == false).length / line.length;
+                nbrOfErasedLines++;
                 this.grid.splice(y, 1);
                 const newLine = [];
                 for (let i = 0; i < gridSize.x; i++) {
@@ -223,8 +271,21 @@ class GameContainer {
                 this.grid.unshift(newLine);
             }
         }
-        if (nbreOfErasedLines) {
-            this.scoreManager.addScoreForErasedLine(nbreOfErasedLines);
+        if (nbrOfErasedLines) {
+            completion /= nbrOfErasedLines;
+            if (completion === 1) { // All letters was used ! Amazing !
+                this.scoreManager.incrementAllLettersUsed();
+            } else if (completion <= 0.6) { // 60% or less of letters was used: adds penalty points.
+                let penaltyPoints = 7 - (completion * 10);
+                penaltyPoints = Math.round(penaltyPoints * (penaltyPoints * 0.5)) * nbrOfErasedLines;
+                this.penaltyPoints += penaltyPoints;
+                if (this.penaltyPoints <= 100) { // Too much penalty points: increases the difficulty.
+                    this.penaltyPoints -= 100;
+                    this.difficulty += 0.1;
+                    this.computeDelay();
+                }
+            }
+            this.scoreManager.addScoreForErasedLine(nbrOfErasedLines);
         }
         this.lettersPool = [];
         this._completeLinesIndex = [];
@@ -259,6 +320,7 @@ class GameContainer {
             this.nextPieces.push(new Tetromino());
         }
         this.tetromino = new Tetromino();
+        this.started = true;
         this.state = TETRIS;
     }
 
@@ -305,9 +367,11 @@ class GameContainer {
             if (this.paused) {
                 // Adds CSS paused class;
                 canvas.classList.add('paused');
+                document.body.classList.add('paused');
             } else {
                 // Removes CSS paused class;
                 canvas.classList.remove('paused');
+                document.body.classList.remove('paused');
             }
         }
         if (this.paused) {
@@ -346,7 +410,8 @@ class GameContainer {
             } else {
                 this.inputDelay.decrease();
             }
-        } else if (inputStates.rotateLeft.pressed) {
+        }
+        if (inputStates.rotateLeft.pressed) {
             if (this.inputDelay.finished) {
                 this.tetromino.rotateLeft();
                 this.inputDelay.reset();
@@ -373,6 +438,7 @@ class GameContainer {
         } else if (key === 'Enter' && this.wordProposal.length >= 3) { // Submits the current word.
             const foundWord = this.checkWord(this.proposedWord);
             if (foundWord) {
+                const alreadyFound = this.scoreManager.wordAlreadyFound(foundWord);
                 // Adds the found word into the score table.
                 this.scoreManager.addWord(foundWord);
                 // Erases all letters who was used to write this word.
@@ -384,8 +450,24 @@ class GameContainer {
                         }
                     }
                 }
+                if (alreadyFound) {
+                    const percent = Math.min(1, foundWord.length / 8);
+                    this.writingTimer.addTime(percent);
+                } else {
+                    this.writingTimer.reset();
+                }
                 this.wordProposal = [];
                 refrestWord = true;
+            } else {
+                const removeWrongAlert = (ev) => {
+                    const { animationName } = ev;
+                    if (animationName === 'red-alert') {
+                        this.textBox.classList.remove('wrong');
+                        this.textBox.removeEventListener('animationend', removeWrongAlert);
+                    }
+                };
+                this.textBox.classList.add('wrong');
+                this.textBox.addEventListener('animationend', removeWrongAlert.bind(this));
             }
         } else if (key === 'Escape') { // Removes current word or returns to Tetris mode.
             if (this.wordProposal.length) { // Removes current word.
@@ -399,16 +481,11 @@ class GameContainer {
                 this.wordProposal = [];
                 refrestWord = true;
             } else { // Returns to the Tetris mode.
-                this.removeTextBox();
-                this.eraseLines();
-                if (!this.tetromino) {
-                    this.dropNextTetromino();
-                }
-                this.state = TETRIS;
+                this.activeTetrisMode();
             }
         }
 
-        const letter = key.length === 1 ? key.toLowerCase() : false;
+        const letter = key.length === 1 ? key.toUpperCase() : false;
         // Adds the letter in the word if the letter is somewhere in the completed line(s).
         if (letter) {
             for (let i = 0; i < this.lettersPool.length; i++) {
@@ -422,7 +499,13 @@ class GameContainer {
             }
         }
         if (refrestWord) {
+            this.textBox.classList.remove('wrong');
             this.textBox.innerText = ` ${this.proposedWord} `;
+            if (this.scoreManager.wordAlreadyFound(this.proposedWord)) {
+                this.textBox.classList.add('already-found');
+            } else {
+                this.textBox.classList.remove('already-found');
+            }
         }
     }
 
@@ -453,10 +536,11 @@ class GameContainer {
     }
 
     processWordGame() {
-        return;
+        this.writingTimer.process();
     }
 
     removeTextBox() {
+        this.wordProposal = [];
         this.textBox.parentElement.remove();
         this.textBox = undefined;
     }

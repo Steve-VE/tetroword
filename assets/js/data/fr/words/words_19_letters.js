@@ -1,4 +1,4 @@
-const _19_letters = [
+data.words.fr['19'] = [
     'APPROVISIONNASSIONS',
     'APPROVISIONNERAIENT',
     'ARTIFICIALISASSIONS',

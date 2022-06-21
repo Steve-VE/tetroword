@@ -1,4 +1,4 @@
-const _20_letters = [
+data.words.fr['20'] = [
     'CINEMATOGRAPHIASSENT',
     'CINEMATOGRAPHIASSIEZ',
     'CINEMATOGRAPHIERIONS',

@@ -1,4 +1,5 @@
-const _3_letters = [
+data.words.fr = {};
+data.words.fr['3'] = [
     'AAS',
     'ACE',
     'ADA',

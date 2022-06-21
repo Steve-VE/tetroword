@@ -3,9 +3,9 @@ class HtmlUI {
         this.element = document.createElement('div');
         this.element.id = 'ui_container';
         this.buttons = [
-            new HtmlButton(this, "Start Game", 'start'),
-            new HtmlButton(this, "Records", 'records'),
-            new HtmlButton(this, "Options", 'options'),
+            new HtmlButton(this, translation("Start Game"), 'start'),
+            new HtmlButton(this, translation("Records"), 'records'),
+            new HtmlButton(this, translation("Settings"), 'options'),
         ];
         this.buttons[1].element.disabled = true;
         this.buttons[2].element.disabled = true;

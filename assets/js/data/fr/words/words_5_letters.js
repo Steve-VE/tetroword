@@ -1,4 +1,4 @@
-const _5_letters = [
+data.words.fr['5'] = [
     'ABACA',
     'ABALE',
     'ABATS',

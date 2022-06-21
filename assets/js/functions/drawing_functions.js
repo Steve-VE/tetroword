@@ -19,7 +19,7 @@ function fill(r, g=undefined, b=undefined, a=1) {
     if (typeof r === 'string') {
         context.fillStyle = r;
     } else {
-        if (r && !g && !b) {
+        if (r && g === undefined && b === undefined) {
             g = r;
             b = r;
         }

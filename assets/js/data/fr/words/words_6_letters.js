@@ -1,4 +1,4 @@
-const _6_letters = [
+data.words.fr['6'] = [
     'ABACAS',
     'ABALES',
     'ABAQUE',

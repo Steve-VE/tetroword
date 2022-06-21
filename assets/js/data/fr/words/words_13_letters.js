@@ -1,4 +1,4 @@
-const _13_letters = [
+data.words.fr['13'] = [
     'ABAISSASSIONS',
     'ABAISSERAIENT',
     'ABANDONNAIENT',

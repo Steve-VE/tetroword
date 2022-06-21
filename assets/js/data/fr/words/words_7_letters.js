@@ -1,4 +1,4 @@
-const _7_letters = [
+data.words.fr['7'] = [
     'ABACOST',
     'ABACULE',
     'ABAISSA',

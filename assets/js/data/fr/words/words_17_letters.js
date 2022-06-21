@@ -1,4 +1,4 @@
-const _17_letters = [
+data.words.fr['17'] = [
     'ACCESSOIRISASSENT',
     'ACCESSOIRISASSIEZ',
     'ACCESSOIRISERIONS',

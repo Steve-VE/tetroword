@@ -61,7 +61,8 @@ class Tetromino {
             this.shape.push([]);
             for (let x = 0; x < shapeScheme[y].length; x++) {
                 if (shapeScheme[y][x]) {
-                    const block = new Tile(letters.pop(), this.shapeIndex);
+                    // const block = new Tile(letters.pop(), this.shapeIndex);
+                    const block = new Tile(false, this.shapeIndex);
                     this.shape[y].push(block);
                 } else {
                     this.shape[y].push(false);

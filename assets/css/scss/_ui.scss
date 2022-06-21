@@ -2,6 +2,8 @@ $measure: 16px;
 
 $fs-medium: 3em;
 
+$text-color: white;
+
 #ui_container {
     width: 100%;
     height: 100%;
@@ -56,24 +58,36 @@ $fs-medium: 3em;
         border-radius: $measure;
         background-color: rgba(0, 0, 0, 0.8);
 
-        color: white;
+        color: $text-color;
         font-family: 'Titillium Web';
         font-size: $fs-medium;
         white-space: pre;
 
         .text-input {
+            display: block;
+            user-select: none;
             border-right: 4px solid white;
             animation: blinky-right-border 1s ease 0s infinite normal none;
+
+            &.wrong {
+                animation:
+                    red-alert 1s ease,
+                    shake 0.8s ease,
+                    blinky-right-border 1s ease 0s infinite normal none;
+            }
+            &.already-found {
+                color: rgb(130, 160, 160);
+            }
         }
     }
 }
 
 @keyframes blinky-right-border {
     0% {
-        border-right: 4px solid white;
+        border-right: 4px solid $text-color;
     }
     55% {
-        border-right: 4px solid white;
+        border-right: 4px solid $text-color;
     }
     56% {
         border-right: 4px solid transparent;
@@ -82,3 +96,54 @@ $fs-medium: 3em;
         border-right: 4px solid transparent;
     }
 }
+
+@keyframes red-alert {
+    0% {
+        color: $text-color;
+    }
+    5% {
+        color: red;
+    }
+    50% {
+        color: red;
+    }
+    100% {
+        color: $text-color;
+    }
+}
+
+@keyframes shake {
+    0% {
+        transform: translate(-4px, 0);
+    }
+    10% {
+        transform: translate(4px, 0);
+    }
+    20% {
+        transform: translate(-3px, 0);
+    }
+    30% {
+        transform: translate(3px, 0);
+    }
+    40% {
+        transform: translate(-2px, 0);
+    }
+    50% {
+        transform: translate(-2px, 0);
+    }
+    60% {
+        transform: translate(-1px, 0);
+    }
+    70% {
+        transform: translate(1px, 0);
+    }
+    80% {
+        transform: translate(-1px, 0);
+    }
+    90% {
+        transform: translate(1px, 0);
+    }
+    100% {
+        transform: translate(0, 0);
+    }
+  }

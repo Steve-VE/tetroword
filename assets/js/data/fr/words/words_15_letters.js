@@ -1,4 +1,4 @@
-const _15_letters = [
+data.words.fr['15'] = [
     'ABANDONNASSIONS',
     'ABANDONNATAIRES',
     'ABANDONNATRICES',

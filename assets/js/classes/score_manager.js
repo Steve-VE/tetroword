@@ -1,8 +1,9 @@
-// Score constants.
+// Score's points constants.
 const __POINTS_WORD_NEW = 100;
 const __POINTS_WORD_DUPLICATE = 2;
 const __POINTS_PIECE_DROP = 1;
 const __POINTS_LINE_ERASED = 50;
+const __POINTS_ALL_LETTERS_USED = 10000;
 
 class ScoreManager {
     constructor() {
@@ -20,6 +21,8 @@ class ScoreManager {
             4: 0,
         };
         this.nbreOfErasedLines = 0;
+        this.clearAllLine = 0;
+        this.usedAllLetters = 0;
     }
 
     addScoreForDroppedPiece() {
@@ -53,13 +56,17 @@ class ScoreManager {
         }
     }
 
+    incrementAllLettersUsed() {
+        this.usedAllLetters++;
+        this._addScore('word', __POINTS_ALL_LETTERS_USED);
+    }
+
     wordAlreadyFound(word) {
-        return Boolean(this.foundWords[word]);
+        return Boolean(this.foundWords[word.toUpperCase()]);
     }
 
     _addScore(category, points) {
         this.scores[category] += Math.floor(points);
-        console.log(`-- Score: ${this.score}`);
     }
 
     get numberOfFoundWords() {

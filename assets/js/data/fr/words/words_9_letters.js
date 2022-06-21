@@ -1,4 +1,4 @@
-const _9_letters = [
+data.words.fr['9'] = [
     'AALENIENS',
     'ABAISSAIS',
     'ABAISSAIT',

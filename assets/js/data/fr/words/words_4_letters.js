@@ -1,4 +1,4 @@
-const _4_letters = [
+data.words.fr['4'] = [
     'ABAT',
     'ABBE',
     'ABDO',
