@@ -5,7 +5,7 @@ class Timer {
             count = undefined;
         }
         this._onIsOverCallback = params.whenIsOver;
-        this.initialDelay = this.set(params.count || count);
+        this.set(params.count || count);
         this.currentDelay = 0;
         this.count = 0;
         this.minimunCount = params.minimunCount || 1;
