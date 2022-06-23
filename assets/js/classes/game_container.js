@@ -513,6 +513,9 @@ class GameContainer {
             } else {
                 this.textBox.classList.remove('already-found');
             }
+            if (this.letterUsageCompletion === 1) { // All letters were used, return to Tetris.
+                this.activeTetrisMode();
+            }
         }
     }
 
@@ -579,6 +582,15 @@ class GameContainer {
             lines.push(this.grid[lineIndex]);
         }
         return lines;
+    }
+
+    get letterUsageCompletion() {
+        let completion = 0;
+        for (const lineIndex of this._completeLinesIndex) {
+            const line = this.grid[lineIndex];
+            completion += line.filter(tile => tile.letter == false).length / line.length;
+        }
+        return completion / this._completeLinesIndex.length;
     }
 
     get proposedWord() {
