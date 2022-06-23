@@ -51,7 +51,7 @@ class GameContainer {
         this.lettersPool = [];
         this.wordProposal = [];
         this.writingTimer = new Timer({
-            count: this.fps * 10,
+            count: this.fps * 20,
             whenIsOver: this.activeTetrisMode.bind(this),
         });
         this._completeLinesIndex = [];
