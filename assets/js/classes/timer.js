@@ -36,9 +36,9 @@ class Timer {
         }
     }
 
-    reset() {
+    reset(forcedValue=undefined) {
         this.currentDelay = this.initialDelay;
-        this.count = this.currentDelay;
+        this.count = forcedValue === undefined ? this.currentDelay : forcedValue;
     }
 
     set(newDelay) {

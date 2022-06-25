@@ -4,6 +4,21 @@ const gridSize = new Vector(10, 20);
 const gridWidth = tileSize * gridSize.x;
 const gridHeight = tileSize * gridSize.y;
 
+const inputs = new InputManager({
+    ArrowLeft: 'left',
+    q: 'left',
+    ArrowRight: 'right',
+    d: 'right',
+    ArrowUp: 'up',
+    z: 'up',
+    ArrowDown: 'down',
+    s: 'down',
+    ' ': 'rotateLeft',
+    a: 'rotateLeft',
+    e: 'rotateRight',
+    Tab: 'pause',
+});
+
 let canvas;
 let context;
 let gameContainer;

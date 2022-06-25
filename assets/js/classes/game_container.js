@@ -1,34 +1,5 @@
 const [INTRO, TETRIS, WORD] = [0, 1, 2];
 
-function _initiateInputs() {
-    const inputNames = ['left', 'right', 'up', 'down', 'rotateLeft', 'rotateRight', 'pause'];
-    const inputs = {};
-    for (let inputName of inputNames) {
-        inputs[inputName] = {
-            pressed: false,
-            priority: 0,
-        };
-    }
-    return inputs;
-}
-
-const inputMapping = {
-    ArrowLeft: 'left',
-    q: 'left',
-    ArrowRight: 'right',
-    d: 'right',
-    ArrowUp: 'up',
-    z: 'up',
-    ArrowDown: 'down',
-    s: 'down',
-    ' ': 'rotateLeft',
-    a: 'rotateLeft',
-    e: 'rotateRight',
-    Tab: 'pause',
-};
-const inputStates = _initiateInputs();
-
-
 class GameContainer {
     constructor() {
         this.fps = 60;
@@ -58,7 +29,6 @@ class GameContainer {
 
         setInterval(this.process.bind(this), this.framerate);
         document.addEventListener('keydown', this.keyPressed.bind(this));
-        document.addEventListener('keyup', this.keyRelased.bind(this));
     }
 
     activeWordMode() {
@@ -342,63 +312,30 @@ class GameContainer {
     }
 
     keyPressed(ev) {
-        const key = ev.key.length === 1 ? ev.key.toLowerCase() : ev.key;
-        const input = inputMapping[key];
-        const inputState = inputStates[input];
-        if (inputState) {
-            ev.preventDefault();
-            if (!inputState.pressed) {
-                this.inputDelay.reset();
-                this.inputDelay.count = 0;
-            }
-            inputState.pressed = true;
-        }
         if (this.state === WORD) {
             this.manageWordInput(ev);
         }
     }
 
-    keyRelased(ev) {
-        const key = ev.key.length === 1 ? ev.key.toLowerCase() : ev.key;
-        const input = inputMapping[key];
-        const inputState = inputStates[input];
-        if (inputState) {
-            inputState.pressed = false;
-        }
-    }
-
     manageTetrisInput() {
-        if (inputStates.pause.pressed) {
-            inputStates.pause.pressed = false;
-            this.paused = !this.paused;
-            if (this.paused) {
-                // Adds CSS paused class;
-                canvas.classList.add('paused');
-                document.body.classList.add('paused');
-            } else {
-                // Removes CSS paused class;
-                canvas.classList.remove('paused');
-                document.body.classList.remove('paused');
-            }
-        }
         if (this.paused) {
             return;
         }
-        if (inputStates.up.pressed) {
+        if (inputs.action('up')) {
             if (this.inputDelay.finished) {
                 this.hardDropTetromino();
                 this.inputDelay.reset();
             } else {
                 this.inputDelay.decrease();
             }
-        } else if (inputStates.left.pressed) {
+        } else if (inputs.action('left')) {
             if (this.inputDelay.finished) {
                 this.tetromino.goLeft();
                 this.inputDelay.lowerDelay();
             } else {
                 this.inputDelay.decrease();
             }
-        } else if (inputStates.down.pressed) {
+        } else if (inputs.action('down')) {
             if (this.inputDelay.finished) {
                 this.moveDelay.reset();
                 if (this.tetromino.canGoDown) {
@@ -410,7 +347,7 @@ class GameContainer {
             } else {
                 this.inputDelay.decrease();
             }
-        } else if (inputStates.right.pressed) {
+        } else if (inputs.action('right')) {
             if (this.inputDelay.finished) {
                 this.tetromino.goRight();
                 this.inputDelay.lowerDelay();
@@ -418,14 +355,14 @@ class GameContainer {
                 this.inputDelay.decrease();
             }
         }
-        if (inputStates.rotateLeft.pressed) {
+        if (inputs.action('rotateLeft')) {
             if (this.inputDelay.finished) {
                 this.tetromino.rotateLeft();
                 this.inputDelay.reset();
             } else {
                 this.inputDelay.decrease();
             }
-        } else if (inputStates.rotateRight.pressed) {
+        } else if (inputs.action('rotateRight')) {
             if (this.inputDelay.finished) {
                 this.tetromino.rotateRight();
                 this.inputDelay.reset();
@@ -555,6 +492,13 @@ class GameContainer {
         this.textBox = undefined;
     }
 
+    resetInputDelay() {
+        if (this.state != TETRIS) {
+            return;
+        }
+        this.inputDelay.reset(0);
+    }
+
     resetTetromino() {
         delete this.tetromino;
         this.inputDelay.reset();
@@ -574,6 +518,29 @@ class GameContainer {
             count: this.speed * 0.3,
             minimumCount: this.speed * 0.8,
         });
+        inputs.bind('left', this.resetInputDelay.bind(this));
+        inputs.bind('right', this.resetInputDelay.bind(this));
+        inputs.bind('down', this.resetInputDelay.bind(this));
+        inputs.bind('up', this.resetInputDelay.bind(this));
+        inputs.bind('rotateLeft', this.resetInputDelay.bind(this));
+        inputs.bind('rotateRight', this.resetInputDelay.bind(this));
+        inputs.bind('pause', this.togglePause.bind(this));
+    }
+
+    togglePause() {
+        if (this.state != TETRIS) {
+            return;
+        }
+        this.paused = !this.paused;
+        if (this.paused) {
+            // Adds CSS paused class;
+            canvas.classList.add('paused');
+            document.body.classList.add('paused');
+        } else {
+            // Removes CSS paused class;
+            canvas.classList.remove('paused');
+            document.body.classList.remove('paused');
+        }
     }
 
     get activeLines() {
