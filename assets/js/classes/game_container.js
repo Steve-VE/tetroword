@@ -112,6 +112,10 @@ class GameContainer {
         const newSpeed = this.fps * (0.75 - (this.difficulty * 0.25));
         this.speed = Math.round(Math.max(this._minSpeed, newSpeed));
         this.moveDelay.set(this.speed);
+        this.inputDelay = new Timer({
+            count: this.speed * 0.3,
+            minimumCount: this.speed * 0.8,
+        });
         debugMessage(`-- New Speed: ${this.speed}`);
     }
 
@@ -225,19 +229,13 @@ class GameContainer {
         }
         if (nbrOfErasedLines) {
             completion /= nbrOfErasedLines;
+            this.increasePenalty(nbrOfErasedLines * 10);
             if (completion === 1) { // All letters was used ! Amazing !
                 this.scoreManager.incrementAllLettersUsed(nbrOfErasedLines);
             } else if (completion <= 0.8) { // 80% or less of letters was used: adds penalty points.
-                const penaltyLimit = 40;
                 let penaltyPoints = 9 - (completion * 10);
                 penaltyPoints = Math.round(penaltyPoints * (penaltyPoints * 0.5)) * nbrOfErasedLines;
-                this.penaltyPoints += penaltyPoints;
-                if (this.penaltyPoints >= penaltyLimit) { // Too much penalty points: increases the difficulty.
-                    const penaltySubstract = Math.floor(this.penaltyPoints / penaltyLimit);
-                    this.difficulty += penaltySubstract * 0.1;
-                    this.penaltyPoints -= penaltySubstract * penaltyLimit;
-                    this.computeDelay();
-                }
+                this.increasePenalty(penaltyPoints);
             }
             this.scoreManager.addScoreForErasedLine(nbrOfErasedLines);
         }
@@ -298,6 +296,17 @@ class GameContainer {
             }
             this.tetromino.lock();
             this.moveDelay.reset();
+        }
+    }
+
+    increasePenalty(points) {
+        const penaltyLimit = 40;
+        this.penaltyPoints += points;
+        if (this.penaltyPoints >= penaltyLimit) { // Too much penalty points: increases the difficulty.
+            const penaltySubstract = Math.floor(this.penaltyPoints / penaltyLimit);
+            this.difficulty += penaltySubstract * 0.1;
+            this.penaltyPoints -= penaltySubstract * penaltyLimit;
+            this.computeDelay();
         }
     }
 
