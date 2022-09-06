@@ -1,8 +1,10 @@
 $measure: 16px;
 
-$fs-medium: 3em;
+$fs-medium: 3rem;
 
-$text-color: white;
+$text-color: rgb(248, 248, 218);
+$text-color-over: white;
+$text-color-muted: rgba(182, 71, 20, 0.5);
 
 #ui_container {
     width: 100%;
@@ -17,15 +19,20 @@ $text-color: white;
     align-items: center;
 
     button {
+        min-width: 300px;
+        max-width: 300px;
+
         padding: $measure;
         margin-bottom: $measure * 2;
         border: 1px solid;
         border-radius: 8px;
+        border-color: $text-color-muted;
 
-        color: white;
+        color: $text-color;
         font-size: $fs-medium;
 
         background-color: transparent;
+        transition: border-color 0.5s;
 
         &:not(:disabled) {
             cursor: pointer;
@@ -35,7 +42,9 @@ $text-color: white;
             }
 
             &:hover {
-                font-size: 3.2em;
+                color: $text-color-over;
+                border-color: $text-color;
+                // font-size: $fs-medium * 1.1;
             }
         }
 
