@@ -12,7 +12,40 @@ class GameContainer {
             (canvas.height - gridHeight) / 2
         );
 
-        this.htmlUI = new HtmlUI();
+        this.htmlUI = new HtmlUI([
+            {
+                text: "Start Game",
+                function: this.gameStart.bind(this),
+            }, {
+                text: "Settings",
+                subElements: [
+                    {
+                        text: "Lang",
+                        subElements: [
+                            {
+                                text: "🇬🇧 English",
+                                function: function() {
+                                    console.log(window.location);
+                                    window.location.href = window.location.origin + '/?lang=en';
+                                },
+                            },
+                            {
+                                text: "🇫🇷 Français",
+                                function: function() {
+                                    console.log(window.location);
+                                    window.location.href = window.location.origin + '/?lang=fr';
+                                },
+                            },
+                        ],
+                    }, {
+                        text: "Key Mapping",
+                        function: function() {
+                            console.log(`-- click on ${this.text} button.`);
+                        }
+                    }
+                ],
+            },
+        ]);
         this.initializeGrid();
 
         // Variables and delays used by the Tetris game part.

@@ -1,15 +1,13 @@
 class HtmlUI {
-    constructor() {
+    constructor(arch) {
         this.element = document.createElement('div');
         this.element.id = 'ui_container';
-        this.buttons = [
-            new HtmlButton(this, translation("Start Game"), 'start'),
-            // new HtmlButton(this, translation("Records"), 'records'),
-            // new HtmlButton(this, translation("Settings"), 'options'),
-        ];
-        // this.buttons[1].element.disabled = true;
-        // this.buttons[2].element.disabled = true;
-        canvas.parentElement.append(this.element);
+        this.children = [];
+        for (const subElementParams of arch) {
+            const htmlButton =  new HtmlButton(this, subElementParams);
+            this.children.push(htmlButton);
+        }
+        this.render();
     }
 
     attach(htmlElement) {
@@ -18,19 +16,29 @@ class HtmlUI {
     }
 
     close() {
-        this.element.style.display = 'none';
+        for (const child of this.children) {
+            child.close();
+        }
     }
 
     display() {
         this.element.style.display = '';
     }
+
+    render() {
+        for (const child of this.children) {
+            child.render();
+        }
+        canvas.parentElement.append(this.element);
+    }
 }
 
 class HtmlElement {
-    constructor(parent) {
+    constructor(parent, params) {
         this.parent = parent;
         this.element = document.createElement('div');
-        this.setup(...arguments);
+        this.children = [];
+        this.setup(params);
         this.bindEvent();
     }
 
@@ -40,27 +48,77 @@ class HtmlElement {
         this.element.addEventListener('click', this.onClick.bind(this));
     }
 
+    close() {
+        this.unbindEvent();
+        for (const child of this.children) {
+            child.element.remove();
+        }
+        this.element.remove();
+    }
+
+    render(target) {
+        target = target ||this.parent;
+        target.element.append(this.element);
+    }
+
+    unbindEvent() {
+        this.element.removeEventListener('click', this.onClick.bind(this));
+    }
+
     onClick(ev) {
         ev.preventDefault();
         ev.stopPropagation();
         debugMessage(`-- Clicked on "${this.text}" button.`);
     }
+
+    get olderParent() {
+        let olderParent = this.parent;
+        while (olderParent.parent) {
+            olderParent = olderParent.parent;
+        }
+        return olderParent;
+    }
+
+    get text() { return this._text; }
+    set text(str) {
+        this._text = str;
+        if (this.element) {
+            this.element.innerText = translation(this.text);
+        }
+    }
 }
 
 class HtmlButton extends HtmlElement {
-    setup(parent, text, func) {
+    setup(params) {
         this.element = document.createElement('button');
-        this.text = text;
-        this.function = func;
-        this.element.innerText = this.text;
-        this.parent.element.append(this.element);
+        this.text = params.text;
+        this.function = params.function;
+        if (params.subElements) {
+            for (const subElementParams of params.subElements) {
+                const htmlButton =  new HtmlButton(this, subElementParams);
+                this.children.push(htmlButton);
+            }
+            const goBackButton = new HtmlButton(this, {
+                text: "<",
+                function: () => {
+                    this.close();
+                    this.parent.render();
+                },
+            });
+            this.children.push(goBackButton);
+        }
     }
 
     onClick(ev) {
         super.onClick(...arguments);
-        if (this.function === 'start') {
+        if (this.function) { // If the button has a method, call it when clicked.
             this.parent.close();
-            gameContainer.gameStart();
+            this.function();
+        } else if (this.children) { // If the button has no method but children, display children.
+            this.parent.close();
+            for (const child of this.children) {
+                child.render(this.olderParent);
+            }
         }
     }
 }

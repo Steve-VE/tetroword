@@ -1,5 +1,7 @@
 data.translations.fr = {
-    'Start Game': 'Nouvelle Partie',
+    'Key Mapping': 'Réglage des Touches',
+    'Lang': 'Langue',
     'Records': 'Records',
     'Settings': 'Options',
+    'Start Game': 'Nouvelle Partie',
 };
