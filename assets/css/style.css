@@ -47,6 +47,23 @@ canvas.paused {
   align-items: center;
 }
 
+#ui_container section h3 {
+  color: #f8f8da;
+  font-size: 2em;
+  margin-bottom: 16px;
+}
+
+#ui_container section button {
+  font-size: 1.5em;
+  min-width: 0;
+  max-width: none;
+  margin-left: 16px;
+}
+
+#ui_container section button:first-child {
+  margin-left: 0;
+}
+
 #ui_container button {
   min-width: 300px;
   max-width: 300px;
