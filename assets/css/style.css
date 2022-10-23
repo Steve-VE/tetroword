@@ -1,7 +1,7 @@
 * {
   margin: 0;
   padding: 0;
-  box-sizing: content-box;
+  box-sizing: border-box;
 }
 
 body {
@@ -33,6 +33,38 @@ canvas {
 canvas.paused {
   transition: 1s;
   filter: sepia(80%) brightness(0.5) blur(4px);
+}
+
+.score-section {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  padding: 8px;
+  text-align: right;
+  font-size: 2em;
+  color: gray;
+  font-family: monospace;
+  user-select: none;
+  transition: 0.5s;
+}
+
+.score-section .actual-score {
+  color: white;
+}
+
+.score-section .dummy-score {
+  transition: 0.5s;
+}
+
+.paused .score-section {
+  filter: sepia(80%) brightness(0.8);
+  transition: 1s;
+}
+
+.paused .score-section .dummy-score {
+  filter: brightness(0.5) blur(1px);
+  transition: 1s;
 }
 
 #ui_container {

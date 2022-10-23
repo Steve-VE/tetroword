@@ -13,6 +13,7 @@ class GameContainer {
         );
 
         this.gameMenu = new GameMenu();
+        this.scoreManager = new ScoreManager();
         this.initializeGrid();
 
         // Variables and delays used by the Tetris game part.
@@ -29,6 +30,18 @@ class GameContainer {
 
         setInterval(this.process.bind(this), this.framerate);
         document.addEventListener('keydown', this.keyPressed.bind(this));
+
+        const scoreSectionTemplate = document.getElementById('score-section-template').content;
+        this.scoreSection = scoreSectionTemplate.cloneNode(true);
+        canvas.parentElement.append(this.scoreSection);
+        this.scoreSection = document.querySelector('.score-section');
+        this.scoreSection.style.width = `${(canvas.width - gridWidth) / 2}px`;
+
+        this.scoreManager.onUpdate(() => {
+            const score = String(this.scoreManager.score);
+            document.querySelector('.dummy-score').innerText = ''.padStart(12 - score.length, '0');
+            document.querySelector('.actual-score').innerText = score;
+        });
     }
 
     activeWordMode() {
@@ -139,19 +152,6 @@ class GameContainer {
         if (this.tetromino) {
             this.tetromino.draw();
         }
-        // Display the score.
-        if (this.started) {
-            let scorePos = new Vector(-20, 40);
-            let score = this.scoreManager.score ? String(this.scoreManager.score) : '';
-            textAlign('right');
-            fill('gray');
-            write(scorePos.x, scorePos.y - 20, "Score:");
-            write(scorePos.x - (13 * score.length), scorePos.y, ''.padStart(12 - score.length, 0));
-            if (score) {
-                fill('white');
-                write(scorePos.x, scorePos.y, score);
-            }
-        }
         if (this.state === WORD) {
             // Display the timer as a bar.
             const { completion } = this.writingTimer;
@@ -250,7 +250,11 @@ class GameContainer {
                 y--;
                 }
                 if (y < 0) {
-                    return resolve();
+                    this.tetromino = undefined;
+                    return setTimeout(
+                        eraseGrid.bind(this, this.grid.length - 1),
+                        delay * 10
+                    );
                 }
                 const frameIndex = 7; // Frame index for the gray tile.
                 const tile = this.grid[y][x];
@@ -260,6 +264,13 @@ class GameContainer {
                     this.grid[y][x] = new Tile('', frameIndex);
                 }
                 setTimeout(fillGrid.bind(this, ++x, y), delay);
+            };
+            const eraseGrid = (y) => {
+                if (y < 0) {
+                    return resolve();
+                }
+                this.grid[y] = [,,,,,,,,,,];
+                setTimeout(eraseGrid.bind(this, --y), delay * 5);
             };
             this.state = INTRO;
             setTimeout(fillGrid.bind(this, 0, gridSize.y - 1), delay);
@@ -273,7 +284,7 @@ class GameContainer {
 
     gameStart() {
         this.resetTimer();
-        this.scoreManager = new ScoreManager();
+        this.scoreManager.reset();
         this.difficulty = 0;
         this.penaltyPoints = 0; // When get 10 penalty points, increase the difficulty by 1.
         this.initializeGrid();

@@ -7,22 +7,7 @@ const __POINTS_ALL_LETTERS_USED = 10000;
 
 class ScoreManager {
     constructor() {
-        this.foundWords = {};
-        this.scores = {
-            tetris: 0,
-            words: 0,
-        };
-        // Stats
-        this.nbreOfDroppedPieces = 0;
-        this.timesLinesWasErasedBy = {
-            1: 0,
-            2: 0,
-            3: 0,
-            4: 0,
-        };
-        this.nbreOfErasedLines = 0;
-        this.clearAllLine = 0;
-        this.usedAllLetters = 0;
+        this.reset();
     }
 
     addScoreForDroppedPiece() {
@@ -61,12 +46,43 @@ class ScoreManager {
         this._addScore('word', __POINTS_ALL_LETTERS_USED * nbr);
     }
 
+    onUpdate(callback) {
+        this.callback = callback;
+    }
+
+    reset() {
+        this.foundWords = {};
+        this.scores = {
+            tetris: 0,
+            words: 0,
+        };
+        // Stats
+        this.nbreOfDroppedPieces = 0;
+        this.timesLinesWasErasedBy = {
+            1: 0,
+            2: 0,
+            3: 0,
+            4: 0,
+        };
+        this.nbreOfErasedLines = 0;
+        this.clearAllLine = 0;
+        this.usedAllLetters = 0;
+        this.update();
+    }
+
+    update() {
+        if (this.callback) {
+            this.callback();
+        }
+    }
+
     wordAlreadyFound(word) {
         return Boolean(this.foundWords[word.toUpperCase()]);
     }
 
     _addScore(category, points) {
         this.scores[category] += Math.floor(points);
+        this.update();
     }
 
     get numberOfFoundWords() {

@@ -70,11 +70,24 @@
     <script src="assets/js/classes/tile.js"></script>
     <script src="assets/js/classes/timer.js"></script>
     <script src="assets/js/classes/vector.js"></script>
-    <script src="assets/js/main_script.js"></script>
 </head>
 <body>
     <div id="game_container">
         <canvas width="800px" height="800px"></canvas>
     </div>
 </body>
+
+<!-- Templates -->
+<template id="score-section-template">
+    <div class="score-section">
+        <div class="score-box">
+            <div>Score:</div>
+            <div class="score-count">
+                <span class="dummy-score"></span><span class="actual-score"></span>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script src="assets/js/main_script.js"></script>
 </html>
