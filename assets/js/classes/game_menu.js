@@ -60,12 +60,14 @@ class GameMenu {
         langFRButton.innerText = "Français";
         langFRButton.addEventListener('click', () => {
             config.lang = 'fr';
+            localStorage.setItem('favorite_lang', config.lang);
             this.render();
         });
         const langENButton = document.createElement('button');
         langENButton.innerText = "English";
         langENButton.addEventListener('click', () => {
             config.lang = 'en';
+            localStorage.setItem('favorite_lang', config.lang);
             this.render();
         });
         const backButton = document.createElement('button');
