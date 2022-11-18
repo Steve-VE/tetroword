@@ -1,3 +1,7 @@
+import { Vector } from "./vector";
+import { Tile } from "./tile";
+import { tileSize, gridHeight, gridSize, gridWidth } from "../constants";
+
 const letterPatterns = {
     j: ['r', 'a', 'x', 'c'],
     l: ['m', 'e', 'b', 'z'],
@@ -8,7 +12,7 @@ const letterPatterns = {
     t: ['p', 'e', 'w', 'q'],
 };
 
-class Tetromino {
+export class Tetromino {
     static shapes(shapeName) {
         const _shapes = {
             j: [
@@ -46,7 +50,8 @@ class Tetromino {
     }
     static shapeNames() { return ['i', 'j', 'l', 'o', 's', 't', 'z']; }
 
-    constructor (x=4, y=-2, shapeIndex=false) {
+    constructor (parent, x=4, y=-2, shapeIndex=false) {
+        this.parent = parent;
         this.shapeIndex = shapeIndex || Math.floor(Math.random() * 7);
         this.type = Tetromino.shapeNames()[this.shapeIndex];
         if (this.type === 'i') { // Position's adjustment in case the tetromino is a pipe.
@@ -75,7 +80,7 @@ class Tetromino {
         if (this.type === 'o') {
             return true; // The square tetromino can rotate in any circumstance/
         }
-        const grid = gameContainer.grid;
+        const grid = this.parent.grid;
         for (let y = 0; y < shape.length; y++) {
             for (let x = 0; x < shape[0].length; x++) {
                 if (!shape[y][x]) { continue; }
@@ -132,7 +137,7 @@ class Tetromino {
     }
 
     lock() {
-        const grid = gameContainer.grid;
+        const grid = this.parent.grid;
         for (let y = 0; y < this.shape.length; y++) {
             for (let x = 0; x < this.shape[0].length; x++) {
                 const tile = this.shape[y][x];
@@ -140,15 +145,15 @@ class Tetromino {
                     continue;
                 }
                 if (this.gridPosition.y < 0) {
-                    gameContainer.gameOver();
+                    this.parent.gameOver();
                     return;
                 }
                 tile.state = 'locked';
                 grid[this.gridPosition.y + y][this.gridPosition.x + x] = tile;
             }
         }
-        gameContainer.scoreManager.addScoreForDroppedPiece();
-        gameContainer.resetTetromino();
+        this.parent.scoreManager.addScoreForDroppedPiece();
+        this.parent.resetTetromino();
     }
 
     rotateLeft() {
@@ -194,7 +199,7 @@ class Tetromino {
     }
 
     get canGoDown() {
-        const grid = gameContainer.grid;
+        const grid = this.parent.grid;
         for (let y = 0; y < this.shape.length; y++) {
             for (let x = 0; x < this.shape[0].length; x++) {
                 if (!this.shape[y][x]) { continue; }
@@ -208,7 +213,7 @@ class Tetromino {
     }
 
     get canGoLeft() {
-        const grid = gameContainer.grid;
+        const grid = this.parent.grid;
         for (let y = 0; y < this.shape.length; y++) {
             for (let x = 0; x < this.shape[0].length; x++) {
                 if (!this.shape[y][x]) { continue; }
@@ -225,7 +230,7 @@ class Tetromino {
     }
 
     get canGoRight() {
-        const grid = gameContainer.grid;
+        const grid = this.parent.grid;
         for (let y = 0; y < this.shape.length; y++) {
             for (let x = 0; x < this.shape[0].length; x++) {
                 if (!this.shape[y][x]) { continue; }

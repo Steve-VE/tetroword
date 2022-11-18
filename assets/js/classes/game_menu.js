@@ -1,7 +1,14 @@
-const [MAIN_MENU, SETTINGS] = [1, 2];
+import { getConfig } from "./config";
+import { debugMessage } from "../functions/debug_functions";
+import { getCanvas, translation } from "../functions/functions";
 
-class GameMenu {
-    constructor() {
+const [MAIN_MENU, SETTINGS] = [1, 2];
+const canvas = getCanvas();
+const config = getConfig();
+
+export class GameMenu {
+    constructor(params) {
+        this.startMethod = params.startMethod;
         this.state = MAIN_MENU;
         this.element = document.createElement('div');
         this.element.id = 'ui_container';
@@ -31,7 +38,7 @@ class GameMenu {
             startGameButton.innerText = translation("Start Game");
             startGameButton.addEventListener('click', () => {
                 this.destroy();
-                gameContainer.gameStart();
+                this.startMethod();
             });
             const settingsButton = document.createElement('button');
             settingsButton.innerText = translation("Settings");
@@ -90,5 +97,5 @@ class GameMenu {
 
         this.element.appendChild(langSection);
         this.element.appendChild(backButton);
-}
+    }
 }

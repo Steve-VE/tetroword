@@ -5,7 +5,7 @@ const __POINTS_PIECE_DROP = 1;
 const __POINTS_LINE_ERASED = 50;
 const __POINTS_ALL_LETTERS_USED = 10000;
 
-class ScoreManager {
+export class ScoreManager {
     constructor() {
         this.reset();
     }

@@ -1,11 +1,18 @@
-let letterPools = [];
+import { getConfig } from "./config";
+import { SpriteSheet } from "./sprite";
+import { tileSize } from "../constants";
+import { fill, textAlign, write } from "../functions/drawing_functions";
 
-class Tile {
+let letterPools = [];
+const config = getConfig();
+
+export class Tile {
     constructor(letter, frameIndex=0) {
         this.letter = letter || this.pickLetter();
         this.state = 'active';
         this.selected = false;
         this.frameIndex = frameIndex;
+        this.spriteTile = SpriteSheet.getSpriteSheet("tile");
     }
 
     activeSelectiveMode() {
@@ -21,7 +28,7 @@ class Tile {
         if (forcedFrame !== undefined && !this.canBeSelected) {
             frameIndex = forcedFrame;
         }
-        spriteTile.draw(frameIndex, x, y, tileSize * size, tileSize * size);
+        this.spriteTile.draw(frameIndex, x, y, tileSize * size, tileSize * size);
         if (size === 1) {
             this.drawLetter(x, y, forcedFrame !== undefined);
         }

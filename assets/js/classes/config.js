@@ -1,4 +1,4 @@
-class Config {
+export class Config {
     constructor() {
         const queryString = window.location.search;
         this.urlParams = new URLSearchParams(queryString);
@@ -22,3 +22,11 @@ class Config {
         return debugParams == 1;
     }
 }
+
+let _config;
+export const getConfig = () => {
+    if (!_config) {
+        _config = new Config();
+    }
+    return _config;
+};

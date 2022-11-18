@@ -1,21 +1,24 @@
+import { getContext } from "./functions";
 
-let _drawFill = true;
-let _drawStroke = false;
-let _translateX =0;
-let _translateY =0;
+let __drawFill = true;
+let __drawStroke = false;
+let __translateX = 0;
+let __translateY = 0;
+
+const context = getContext();
 
 
-function drawImage(imageSrc, sx, sy, sw, sh, x, y, w, h) {
+export function drawImage(imageSrc, sx, sy, sw, sh, x, y, w, h) {
     if (!context) { return; }
-    x += _translateX;
-    y += _translateY;
+    x += __translateX;
+    y += __translateY;
     context.drawImage(imageSrc, sx, sy, sw, sh, x, y, w, h);
 }
 
 
-function fill(r, g=undefined, b=undefined, a=1) {
+export function fill(r, g=undefined, b=undefined, a=1) {
     if (!context) { return; }
-    _drawFill = true;
+    __drawFill = true;
     if (typeof r === 'string') {
         context.fillStyle = r;
     } else {
@@ -27,25 +30,25 @@ function fill(r, g=undefined, b=undefined, a=1) {
     }
 }
 
-function noFill() { _drawFill = false; }
+export function noFill() { __drawFill = false; }
 
-function noStroke() { _drawStroke = false; }
+export function noStroke() { __drawStroke = false; }
 
-function rect(x, y, w, h) {
-    x += _translateX;
-    y += _translateY;
+export function rect(x, y, w, h) {
+    x += __translateX;
+    y += __translateY;
     if (!context) { return; }
-    if (_drawFill) {
+    if (__drawFill) {
         context.fillRect(x, y, w, h || w);
     }
-    if (_drawStroke) {
+    if (__drawStroke) {
         context.strokeRect(x, y, w, h || w);
     }
 }
 
-function stroke(r, g=undefined, b=undefined, a=1) {
+export function stroke(r, g=undefined, b=undefined, a=1) {
     if (!context) { return; }
-    _drawStroke = true;
+    __drawStroke = true;
     if (typeof r === 'string') {
         context.strokeStyle = r;
     } else {
@@ -53,22 +56,22 @@ function stroke(r, g=undefined, b=undefined, a=1) {
     }
 }
 
-function textAlign(align) {
+export function textAlign(align) {
     context.textAlign = align;
 }
 
-function translate(x, y) {
-    _translateX = x;
-    _translateY = y;
+export function translate(x, y) {
+    __translateX = x;
+    __translateY = y;
 }
 
-function write(x, y, text) {
-    x += _translateX;
-    y += _translateY;
-    if (_drawStroke) {
+export function write(x, y, text) {
+    x += __translateX;
+    y += __translateY;
+    if (__drawStroke) {
         context.strokeText(text, x, y);
     }
-    if (_drawFill) {
+    if (__drawFill) {
         context.fillText(text, x, y);
     }
 }

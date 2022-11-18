@@ -1,4 +1,4 @@
-class Vector {
+export class Vector {
     constructor(x=0, y=0) {
         this._position = [x, y];
     }

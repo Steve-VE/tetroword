@@ -1,6 +1,14 @@
+import { debugMessage } from "../functions/debug_functions";
+import { Vector } from "./vector";
+import { drawImage } from "../functions/drawing_functions";
 
-class SpriteSheet {
-    constructor(source, rowNumber, columnNumber) {
+export class SpriteSheet {
+    static getSpriteSheet(spriteSheetName) {
+        return SpriteSheet._spriteSheetCollection[spriteSheetName];
+    }
+
+    constructor(spriteSheetName, source, rowNumber, columnNumber) {
+        this.name = spriteSheetName;
         debugMessage(`-- Loading spritesheet (${source})`);
         this.source = source;
         this.image = new Image();
@@ -19,6 +27,10 @@ class SpriteSheet {
                 resolve();
             };
         });
+        if (SpriteSheet._spriteSheetCollection === undefined) {
+            SpriteSheet._spriteSheetCollection = {};
+        }
+        SpriteSheet._spriteSheetCollection[this.name] = this;
     }
 
     draw(spriteIndex, x, y, width, height) {

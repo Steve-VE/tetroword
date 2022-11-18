@@ -1,4 +1,5 @@
-class InputManager {
+let _inputManager;
+export class InputManager {
     constructor(inputMapping) {
         this.keys = {};
         this._actions = {};
@@ -46,8 +47,20 @@ class InputManager {
     }
 }
 
+export const configInputManager = (inputMapping) => {
+    _inputManager = new InputManager(inputMapping);
+    return _inputManager;
+};
 
-class Input {
+export const getInputManager = () => {
+    if (!_inputManager) {
+        throw "InputManager need to be configured before used ! See `configInputManager`";
+    }
+    return _inputManager;
+};
+
+
+export class Input {
     constructor(key, action) {
         this.key = key;
         this._pressed = false;
@@ -70,7 +83,7 @@ class Input {
 }
 
 
-class InputAction {
+export class InputAction {
     constructor() {
         this.value = 0;
     }

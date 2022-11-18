@@ -1,18 +1,52 @@
+import { GameMenu } from "./game_menu";
+import { Vector } from "./vector";
+import { ScoreManager } from "./score_manager";
+import { Timer } from "./timer";
+import { fill, noStroke, rect, stroke, translate } from "../functions/drawing_functions";
+import { getCanvas } from "../functions/functions";
+import { configInputManager } from "./input_manager";
+import { Tetromino } from "./tetromino";
+import { tileSize, gridHeight, gridSize, gridWidth } from "../constants";
+import { getConfig } from "./config";
+import { debugMessage } from "../functions/debug_functions";
+import { Tile } from "./tile";
+
 const [INTRO, TETRIS, WORD] = [0, 1, 2];
 
-class GameContainer {
+let _gameContainer;
+
+const config = getConfig();
+const inputs = configInputManager({
+    ArrowLeft: 'left',
+    q: 'left',
+    ArrowRight: 'right',
+    d: 'right',
+    ArrowUp: 'up',
+    z: 'up',
+    ArrowDown: 'down',
+    s: 'down',
+    ' ': 'rotateLeft',
+    a: 'rotateLeft',
+    e: 'rotateRight',
+    Tab: 'pause',
+});
+
+export class GameContainer {
     constructor() {
         this.fps = 60;
         this.framerate = 1000 / this.fps;
         this.framecount = 0;
         this.started = false;
         this.state = INTRO;
+        this.canvas = getCanvas();
         this.margin = new Vector(
-            (canvas.width - gridWidth) / 2,
-            (canvas.height - gridHeight) / 2
+            (this.canvas.width - gridWidth) / 2,
+            (this.canvas.height - gridHeight) / 2
         );
 
-        this.gameMenu = new GameMenu();
+        this.gameMenu = new GameMenu({
+            startMethod: this.gameStart.bind(this),
+        });
         this.scoreManager = new ScoreManager();
         this.initializeGrid();
 
@@ -33,9 +67,9 @@ class GameContainer {
 
         const scoreSectionTemplate = document.getElementById('score-section-template').content;
         this.scoreSection = scoreSectionTemplate.cloneNode(true);
-        canvas.parentElement.append(this.scoreSection);
+        this.canvas.parentElement.append(this.scoreSection);
         this.scoreSection = document.querySelector('.score-section');
-        this.scoreSection.style.width = `${(canvas.width - gridWidth) / 2}px`;
+        this.scoreSection.style.width = `${(this.canvas.width - gridWidth) / 2}px`;
 
         this.scoreManager.onUpdate(() => {
             const score = String(this.scoreManager.score);
@@ -77,7 +111,7 @@ class GameContainer {
             posY = (bottomLineIndex + 2) * tileSize;
         }
         htmlTextBoxContainer.style.top = `${posY}px`;
-        canvas.parentElement.append(htmlTextBoxContainer);
+        this.canvas.parentElement.append(htmlTextBoxContainer);
     }
 
     checkLines() {
@@ -136,7 +170,7 @@ class GameContainer {
         }
         // Background.
         fill(10, 20, 30);
-        rect(0, 0, canvas.width, canvas.height);
+        rect(0, 0, this.canvas.width, this.canvas.height);
         translate(this.margin.x, this.margin.y);
         this.drawGrid();
         // Tetrominos.
@@ -205,7 +239,7 @@ class GameContainer {
     dropNextTetromino() {
         const nextTetromino = this.nextPieces.shift();
         this.tetromino = nextTetromino;
-        this.nextPieces.push(new Tetromino());
+        this.nextPieces.push(new Tetromino(this));
     }
 
     eraseLines() {
@@ -291,9 +325,9 @@ class GameContainer {
 
         this.nextPieces = [];
         for (let i = 0; i < 4; i++) {
-            this.nextPieces.push(new Tetromino());
+            this.nextPieces.push(new Tetromino(this));
         }
-        this.tetromino = new Tetromino();
+        this.tetromino = new Tetromino(this);
         this.started = true;
         this.state = TETRIS;
     }
@@ -552,11 +586,11 @@ class GameContainer {
         this.paused = !this.paused;
         if (this.paused) {
             // Adds CSS paused class;
-            canvas.classList.add('paused');
+            this.canvas.classList.add('paused');
             document.body.classList.add('paused');
         } else {
             // Removes CSS paused class;
-            canvas.classList.remove('paused');
+            this.canvas.classList.remove('paused');
             document.body.classList.remove('paused');
         }
     }
@@ -582,3 +616,10 @@ class GameContainer {
         return this.wordProposal.map(tile => tile.letter).join('');
     }
 }
+
+export const getGameContainer = () => {
+    if (!_gameContainer) {
+        _gameContainer = new GameContainer();
+    }
+    return _gameContainer;
+};

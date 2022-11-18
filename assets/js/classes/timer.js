@@ -1,4 +1,4 @@
-class Timer {
+export class Timer {
     constructor(count, params={}) {
         if (typeof count === 'object') {
             params = count;
