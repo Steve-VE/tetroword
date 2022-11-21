@@ -3,9 +3,11 @@ export class InputManager {
     constructor(inputMapping) {
         this.keys = {};
         this._actions = {};
-        for (const [key, action] of Object.entries(inputMapping)) {
-            this._actions[action] = this._actions[action] || new InputAction();
+        for (const [key, actionData] of Object.entries(inputMapping)) {
+            const [ action, description ] = actionData;
+            this._actions[action] = this._actions[action] || new InputAction(action, description);
             this.keys[key] = new Input(key, this._actions[action]);
+            this._actions[action].addKey(this.keys[key]);
         }
         document.addEventListener('keydown', this.keyPressed.bind(this));
         document.addEventListener('keyup', this.keyRelased.bind(this));
@@ -45,9 +47,40 @@ export class InputManager {
             input.released();
         }
     }
+
+    replaceKeyForAction(inputAction, oldInput, newInputKey) {
+        if (oldInput.key === newInputKey) {
+            return oldInput; // Already this button, no need to do anything.
+        }
+        // First, checks if the new key in already used elsewhere.
+        const inputAlreadyUsed = this.keys[newInputKey];
+        if (inputAlreadyUsed) {
+            this._switchInputKeys(inputAlreadyUsed, oldInput);
+            return inputAlreadyUsed;
+        } else {
+            inputAction.removeKey(oldInput);
+            delete this.keys[oldInput.key];
+            const newInput = new Input(newInputKey, inputAction);
+            this.keys[newInputKey] = newInput;
+            inputAction.addKey(newInput);
+            return newInput;
+        }
+    }
+
+    _switchInputKeys(keyInputA, keyInputB) {
+        const actionA = keyInputA.action;
+        const actionB = keyInputB.action;
+        actionA.removeKey(keyInputA);
+        actionB.removeKey(keyInputB);
+        actionA.addKey(keyInputB);
+        actionB.addKey(keyInputA);
+    }
 }
 
 export const configInputManager = (inputMapping) => {
+    if (_inputManager) {
+        throw "The input manager is already configured. Use `getInputManager` instead.";
+    }
     _inputManager = new InputManager(inputMapping);
     return _inputManager;
 };
@@ -84,8 +117,29 @@ export class Input {
 
 
 export class InputAction {
-    constructor() {
+    constructor(name, description) {
+        this.name = name;
+        this.description = description;
         this.value = 0;
+        this.keys = [];
+    }
+
+    addKey(key) {
+        key.action = this;
+        this.keys.push(key);
+    }
+
+    removeKey(key) {
+        for (const keyIndex in this.keys) {
+            const inputKey = this.keys[keyIndex];
+            if (inputKey === key) { // Removes the old key binding.
+                inputKey.released(); // Be sure the key is released to avoid calling action in continue.
+                inputKey.action = undefined;
+                this.keys.splice(keyIndex, 1);
+                return true;
+            }
+        }
+        return false;
     }
 
     pressed() {
@@ -93,9 +147,11 @@ export class InputAction {
             this.callback();
         }
         this.value++;
+        console.log(`-- ${this.name} is pressed. Its value: ${this.value}`);
     }
 
     released() {
         this.value--;
+        console.log(`-- ${this.name} is released. Its value: ${this.value}`);
     }
 }

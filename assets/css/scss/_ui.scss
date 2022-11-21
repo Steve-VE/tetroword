@@ -71,6 +71,26 @@ $text-color-muted: rgba(182, 71, 20, 0.5);
             opacity: 0.5;
         }
     }
+
+    li {
+        margin: ($measure / 2) 0;
+        color: $text-color;
+        list-style-type: none;
+
+        .key-action-name {
+            display: inline-block;
+            min-width: 100px;
+            font-size: $fs-medium / 3;
+            padding-right: $measure / 2;
+        }
+
+        .selected-key {
+            min-width: 200px;
+            margin-bottom: 0;
+            padding: $measure / 2;
+            font-size: $fs-medium / 3;
+        }
+    }
 }
 
 .container {
