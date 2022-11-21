@@ -6,6 +6,10 @@ export class Config {
         this.debug = this.getEnvDebug();
     }
 
+    get(itemName, defaultValue) {
+        return localStorage.getItem(itemName) || defaultValue;
+    }
+
     /**
      * Checks if the user specified a lang to use. It will check in the localStorage (user chose a
      * lang in the game's settings) or in the url parameters.

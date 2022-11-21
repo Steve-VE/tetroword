@@ -127,6 +127,26 @@ canvas.paused {
   opacity: 0.5;
 }
 
+#ui_container li {
+  margin: 8px 0;
+  color: #f8f8da;
+  list-style-type: none;
+}
+
+#ui_container li .key-action-name {
+  display: inline-block;
+  min-width: 100px;
+  font-size: 1rem;
+  padding-right: 8px;
+}
+
+#ui_container li .selected-key {
+  min-width: 200px;
+  margin-bottom: 0;
+  padding: 8px;
+  font-size: 1rem;
+}
+
 .container {
   display: flex;
   justify-content: center;

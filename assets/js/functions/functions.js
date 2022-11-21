@@ -1,4 +1,5 @@
 import { getConfig } from "../classes/config";
+import { debugMessage } from "./debug_functions";
 
 const config = getConfig();
 let _canvas, _context;

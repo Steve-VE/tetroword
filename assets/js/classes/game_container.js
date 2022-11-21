@@ -17,18 +17,18 @@ let _gameContainer;
 
 const config = getConfig();
 const inputs = configInputManager({
-    ArrowLeft: 'left',
-    q: 'left',
-    ArrowRight: 'right',
-    d: 'right',
-    ArrowUp: 'up',
-    z: 'up',
-    ArrowDown: 'down',
-    s: 'down',
-    ' ': 'rotateLeft',
-    a: 'rotateLeft',
-    e: 'rotateRight',
-    Tab: 'pause',
+    [config.get('left', 'ArrowLeft')]: ['left', "Move to Left"],
+    // q: ['left', "Move to Left"],
+    [config.get('right', 'ArrowRight')]: ['right', "Move to Right"],
+    // d: ['right', "Move to Right"],
+    [config.get('up', 'ArrowUp')]: ['up', "Hard Drop"],
+    // z: ['up', "Hard Drop"],
+    [config.get('down', 'ArrowDown')]: ['down', "Soft Drop"],
+    // s: ['down', "Soft Drop"],
+    [config.get('rotateLeft', ' ')]: ['rotateLeft', "Rotate Left"],
+    // a: ['rotateLeft', "Rotate Left"],
+    [config.get('rotateRight', 'e')]: ['rotateRight', "Rotate Right"],
+    [config.get('pause', 'Tab')]: ['pause', "Pause"],
 });
 
 export class GameContainer {
