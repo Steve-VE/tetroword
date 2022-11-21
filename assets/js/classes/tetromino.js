@@ -1,6 +1,6 @@
-import { Vector } from "./vector";
-import { Tile } from "./tile";
-import { tileSize, gridHeight, gridSize, gridWidth } from "../constants";
+import { Vector } from "./vector.js";
+import { Tile } from "./tile.js";
+import { tileSize, gridHeight, gridSize, gridWidth } from "../constants.js";
 
 const letterPatterns = {
     j: ['r', 'a', 'x', 'c'],

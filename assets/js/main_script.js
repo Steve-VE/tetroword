@@ -1,5 +1,5 @@
-import { SpriteSheet } from "./classes/sprite";
-import { GameContainer } from "./classes/game_container";
+import { SpriteSheet } from "./classes/sprite.js";
+import { GameContainer } from "./classes/game_container.js";
 
 let canvas;
 let context;

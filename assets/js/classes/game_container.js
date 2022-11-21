@@ -1,15 +1,15 @@
-import { GameMenu } from "./game_menu";
-import { Vector } from "./vector";
-import { ScoreManager } from "./score_manager";
-import { Timer } from "./timer";
-import { fill, noStroke, rect, stroke, translate } from "../functions/drawing_functions";
-import { getCanvas } from "../functions/functions";
-import { configInputManager } from "./input_manager";
-import { Tetromino } from "./tetromino";
-import { tileSize, gridHeight, gridSize, gridWidth } from "../constants";
-import { getConfig } from "./config";
-import { debugMessage } from "../functions/debug_functions";
-import { Tile } from "./tile";
+import { GameMenu } from "./game_menu.js";
+import { Vector } from "./vector.js";
+import { ScoreManager } from "./score_manager.js";
+import { Timer } from "./timer.js";
+import { fill, noStroke, rect, stroke, translate } from "../functions/drawing_functions.js";
+import { getCanvas } from "../functions/functions.js";
+import { configInputManager } from "./input_manager.js";
+import { Tetromino } from "./tetromino.js";
+import { tileSize, gridHeight, gridSize, gridWidth } from "../constants.js";
+import { getConfig } from "./config.js";
+import { debugMessage } from "../functions/debug_functions.js";
+import { Tile } from "./tile.js";
 
 const [INTRO, TETRIS, WORD] = [0, 1, 2];
 

@@ -1,7 +1,7 @@
-import { getConfig } from "./config";
-import { debugMessage } from "../functions/debug_functions";
-import { getCanvas, translation } from "../functions/functions";
-import { getInputManager } from "./input_manager";
+import { getConfig } from "./config.js";
+import { debugMessage } from "../functions/debug_functions.js";
+import { getCanvas, translation } from "../functions/functions.js";
+import { getInputManager } from "./input_manager.js";
 
 const [MAIN_MENU, SETTINGS] = [1, 2];
 const canvas = getCanvas();
