@@ -1,4 +1,4 @@
-import { getContext } from "./functions";
+import { getContext } from "./functions.js";
 
 let __drawFill = true;
 let __drawStroke = false;

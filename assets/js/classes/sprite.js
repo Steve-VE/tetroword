@@ -1,6 +1,6 @@
-import { debugMessage } from "../functions/debug_functions";
-import { Vector } from "./vector";
-import { drawImage } from "../functions/drawing_functions";
+import { debugMessage } from "../functions/debug_functions.js";
+import { Vector } from "./vector.js";
+import { drawImage } from "../functions/drawing_functions.js";
 
 export class SpriteSheet {
     static getSpriteSheet(spriteSheetName) {

@@ -1,7 +1,7 @@
-import { getConfig } from "./config";
-import { SpriteSheet } from "./sprite";
-import { tileSize } from "../constants";
-import { fill, textAlign, write } from "../functions/drawing_functions";
+import { getConfig } from "./config.js";
+import { SpriteSheet } from "./sprite.js";
+import { tileSize } from "../constants.js";
+import { fill, textAlign, write } from "../functions/drawing_functions.js";
 
 let letterPools = [];
 const config = getConfig();

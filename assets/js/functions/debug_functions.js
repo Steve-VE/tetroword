@@ -1,4 +1,4 @@
-import { getConfig } from "../classes/config";
+import { getConfig } from "../classes/config.js";
 
 const config = getConfig();
 

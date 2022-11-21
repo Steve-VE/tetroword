@@ -1,5 +1,5 @@
-import { getConfig } from "../classes/config";
-import { debugMessage } from "./debug_functions";
+import { getConfig } from "../classes/config.js";
+import { debugMessage } from "./debug_functions.js";
 
 const config = getConfig();
 let _canvas, _context;

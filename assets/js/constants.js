@@ -1,4 +1,4 @@
-import { Vector } from "./classes/vector";
+import { Vector } from "./classes/vector.js";
 
 export const tileSize = 38;
 export const gridSize = new Vector(10, 20);
